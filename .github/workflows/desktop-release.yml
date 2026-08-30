@@ -405,7 +405,7 @@ jobs:
             for ($attempt = 1; $attempt -le 8; $attempt++) {
               try {
                 $cacheBust = [guid]::NewGuid().ToString("N")
-                $validatedManifest = Read-ValidManifest "$manifestUrl?cachebust=$cacheBust"
+                $validatedManifest = Read-ValidManifest "${manifestUrl}?cachebust=${cacheBust}"
                 break
               } catch {
                 Write-Host "Manifest is not ready at $manifestUrl (attempt $attempt): $($_.Exception.Message)"
