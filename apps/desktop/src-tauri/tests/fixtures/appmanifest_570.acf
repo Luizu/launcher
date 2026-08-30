@@ -1,0 +1,30 @@
+"AppState"
+{
+	"appid"		"570"
+	"Universe"		"1"
+	"name"		"Dota 2"
+	"StateFlags"		"1026"
+	"installdir"		"dota 2 beta"
+	"LastUpdated"		"1727280562"
+	"UpdateResult"		"0"
+	"SizeOnDisk"		"27113174638"
+	"buildid"		"14943838"
+	"LastOwner"		"76561198123456789"
+	"UpdateHistory"
+	{
+		"Update"
+		{
+			"buildid"		"14943838"
+			"timeupdated"		"1727280562"
+		}
+	}
+	"SharedDepots"
+	{
+		"570"		"8121418653173351526"
+	}
+	"UserConfig"
+	{
+		"language"		"english"
+	}
+	"Mounteds"	{}
+}

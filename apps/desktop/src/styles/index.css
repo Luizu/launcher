@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  /* No artificial minimum page width: the app must stay usable down to
+     ~800×600 and nothing forces the page to scroll horizontally. Wide
+     content scrolls inside its own container (selector row, grids,
+     toolbars). */
+  background: #101114;
+  color: #f4f4f5;
+}
+
+/* Ambient motion — the approved "Ambiente" level: a slow, subtle loop on the
+   hero media layer only (18s cycle, ~1.01→1.06 scale with a few-% translate,
+   ease-in-out, infinite alternate). Overlays, selector, topbar, and buttons
+   never loop; the hero keeps its overlays legible. */
+@keyframes ambient-hero {
+  from {
+    transform: scale(1.01) translate3d(-0.4%, -0.2%, 0);
+  }
+  to {
+    transform: scale(1.06) translate3d(0.5%, 0.4%, 0);
+  }
+}
+
+.animate-ambient {
+  animation: ambient-hero 18s ease-in-out infinite alternate;
+}
+
+/* Selection transition on the featured copy: a short rise + fade-in (the
+   prototype's `copy-in`), replayed on each featured-game change via the keyed
+   title. The media itself crossfades through opacity transitions. */
+@keyframes copy-in {
+  from {
+    opacity: 0.2;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-copy-in {
+  animation: copy-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Reduced motion: kill every continuous loop regardless of the JS wiring and
+   let transitions collapse to brief state/opacity changes. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-ambient,
+  .animate-copy-in {
+    animation: none;
+  }
+}

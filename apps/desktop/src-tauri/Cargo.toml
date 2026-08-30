@@ -1,0 +1,53 @@
+[package]
+name = "launcher-desktop"
+version = "0.2.1"
+description = "Native Windows runtime for the launcher desktop shell"
+edition = "2021"
+
+[lib]
+name = "launcher_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+# Test-only seam for the integration smoke harness (tests/windows_smoke.rs).
+# Off by default: release builds carry no harness-facing public surface.
+smoke = []
+
+[[test]]
+name = "windows_smoke"
+required-features = ["smoke"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[target.'cfg(windows)'.build-dependencies]
+# Keep the Crashpad provider direct so Cargo exposes its build metadata to our
+# build.rs. Relying on sentry-contrib-native's transitive dependency leaves the
+# handler path unavailable when Cargo runs build scripts in parallel.
+sentry-contrib-native-sys = { version = "0.3.1", features = ["backend-crashpad"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-log = "2"
+log = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri-plugin-http = "2.5.9"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+sentry = { version = "0.49", default-features = false, features = ["backtrace", "contexts", "panic", "transport"] }
+
+[profile.release]
+debug = "line-tables-only"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.56"
+# sentry-contrib-native 0.3.1 pulls rmpv 0.4.7, whose decoder still uses
+# private rmp helpers removed in rmp 0.8.15. Keep the compatible release
+# explicit so a fresh Windows build does not resolve the broken pair.
+rmp = "=0.8.14"
+sentry-contrib-native = { version = "0.3.1", features = ["backend-crashpad"] }

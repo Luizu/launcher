@@ -1,0 +1,5 @@
+{
+  "bundle": {
+    "resources": ["resources/crashpad_handler.exe"]
+  }
+}
