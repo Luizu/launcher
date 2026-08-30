@@ -377,28 +377,48 @@ jobs:
         if: env.RELEASE_MODE == 'true'
         shell: pwsh
         run: |
-          $manifestUrl = "https://github.com/$env:GITHUB_REPOSITORY/releases/latest/download/latest.json"
-          $response = $null
-          for ($attempt = 1; $attempt -le 6; $attempt++) {
-            try {
-              $response = Invoke-WebRequest -Uri $manifestUrl -UseBasicParsing -TimeoutSec 30
-              if ($response.StatusCode -eq 200) { break }
-            } catch {
-              Write-Host "Manifest is not visible yet (attempt $attempt): $($_.Exception.Message)"
-            }
-            Start-Sleep -Seconds ([math]::Min(5 * $attempt, 20))
-          }
-          if ($null -eq $response -or $response.StatusCode -ne 200) { throw "Public latest.json did not become available anonymously" }
-          $manifest = $response.Content | ConvertFrom-Json
           $expectedVersion = (Get-Content -Raw -Path package.json | ConvertFrom-Json).version
-          $platform = $manifest.platforms.'windows-x86_64'
-          if ($null -eq $platform) { throw "Public latest.json is missing windows-x86_64" }
-          if ([string]$manifest.version -ne [string]$expectedVersion) {
-            throw "Public latest.json version mismatch: expected '$expectedVersion', got '$($manifest.version)'"
+          function Read-ValidManifest([string]$manifestUrl) {
+            $response = Invoke-WebRequest -Uri $manifestUrl -UseBasicParsing -TimeoutSec 30
+            if ($response.StatusCode -ne 200) { throw "HTTP status $($response.StatusCode)" }
+            $candidate = $response.Content | ConvertFrom-Json
+            $platform = $candidate.platforms.'windows-x86_64'
+            if ($null -eq $platform) { throw "manifest is missing windows-x86_64" }
+            if ([string]$candidate.version -ne [string]$expectedVersion) {
+              throw "manifest version is '$($candidate.version)', expected '$expectedVersion'"
+            }
+            $expectedUrl = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:RELEASE_TAG/$($platform.url.Split('/')[-1])"
+            if ([string]$platform.url -ne $expectedUrl) {
+              throw "manifest URL is '$($platform.url)', expected '$expectedUrl'"
+            }
+            if ([string]::IsNullOrWhiteSpace([string]$platform.signature)) { throw "manifest is missing the updater signature" }
+            return $candidate
           }
-          $expectedUrl = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:RELEASE_TAG/$($platform.url.Split('/')[-1])"
-          if ([string]$platform.url -ne $expectedUrl) {
-            throw "Public latest.json URL mismatch: expected '$expectedUrl', got '$($platform.url)'"
+
+          $manifestUrls = @(
+            "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:RELEASE_TAG/latest.json",
+            "https://github.com/$env:GITHUB_REPOSITORY/releases/latest/download/latest.json"
+          )
+          $manifest = $null
+          foreach ($manifestUrl in $manifestUrls) {
+            $validatedManifest = $null
+            for ($attempt = 1; $attempt -le 8; $attempt++) {
+              try {
+                $validatedManifest = Read-ValidManifest $manifestUrl
+                break
+              } catch {
+                Write-Host "Manifest is not ready at $manifestUrl (attempt $attempt): $($_.Exception.Message)"
+              }
+              Start-Sleep -Seconds ([math]::Min(5 * $attempt, 20))
+            }
+            if ($null -eq $validatedManifest) {
+              throw "Valid updater manifest did not become available at $manifestUrl"
+            }
+            if ($null -eq $manifest) {
+              $manifest = $validatedManifest
+            } elseif ([string]$validatedManifest.platforms.'windows-x86_64'.url -ne [string]$manifest.platforms.'windows-x86_64'.url -or
+              [string]$validatedManifest.platforms.'windows-x86_64'.signature -ne [string]$manifest.platforms.'windows-x86_64'.signature) {
+              throw "The public latest.json alias does not match the release manifest"
+            }
           }
-          if ([string]::IsNullOrWhiteSpace([string]$platform.signature)) { throw "Public latest.json is missing the updater signature" }
-          Write-Host "Validated public updater manifest for $($manifest.version) with signature length $(([string]$platform.signature).Length)"
+          Write-Host "Validated public updater manifests for $($manifest.version) with signature length $(([string]$manifest.platforms.'windows-x86_64'.signature).Length)"
