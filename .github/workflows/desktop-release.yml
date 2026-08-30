@@ -392,4 +392,13 @@ jobs:
           $manifest = $response.Content | ConvertFrom-Json
           $expectedVersion = (Get-Content -Raw -Path package.json | ConvertFrom-Json).version
           $platform = $manifest.platforms.'windows-x86_64'
-          if ($manifest.version -ne $expectedVersion -or $platform.url -notlike "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:RELEASE_TAG/*" -or [string]::IsNullOrWhiteSpace($platform.signature)) { throw "Public latest.json has invalid version, URL or signature" }
+          if ($null -eq $platform) { throw "Public latest.json is missing windows-x86_64" }
+          if ([string]$manifest.version -ne [string]$expectedVersion) {
+            throw "Public latest.json version mismatch: expected '$expectedVersion', got '$($manifest.version)'"
+          }
+          $expectedUrl = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:RELEASE_TAG/$($platform.url.Split('/')[-1])"
+          if ([string]$platform.url -ne $expectedUrl) {
+            throw "Public latest.json URL mismatch: expected '$expectedUrl', got '$($platform.url)'"
+          }
+          if ([string]::IsNullOrWhiteSpace([string]$platform.signature)) { throw "Public latest.json is missing the updater signature" }
+          Write-Host "Validated public updater manifest for $($manifest.version) with signature length $(([string]$platform.signature).Length)"
