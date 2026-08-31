@@ -161,6 +161,25 @@ it("shows no enrichment badge for enriched entries", () => {
   expect(screen.queryByText("Sem dados de catálogo")).not.toBeInTheDocument();
 });
 
+it("uses canonical playtime and remote activity when both legacy aliases exist", () => {
+  renderCard(
+    <GameCard
+      game={{
+        ...INSTALLED_CS2,
+        playtimeTotalMinutes: 2538,
+        playtimeMinutes: 999,
+        remoteLastPlayedAt: "2026-08-30T10:00:00.000Z",
+        lastActivityAt: "2026-08-01T10:00:00.000Z",
+      }}
+      onLaunch={vi.fn()}
+      onInstall={vi.fn()}
+    />,
+  );
+
+  expect(screen.getByText("42h18 jogados")).toBeInTheDocument();
+  expect(screen.getByText("Jogado em 30/08/2026")).toBeInTheDocument();
+});
+
 it("prefers the catalog identity name as the displayed title", () => {
   renderCard(
     <GameCard
@@ -259,4 +278,32 @@ it("renders the catalog selector cover when available", () => {
   // Outside the hero everything loads lazily with async decoding.
   expect(img).toHaveAttribute("loading", "lazy");
   expect(img).toHaveAttribute("decoding", "async");
+});
+
+it("renders the approved landscape appearance for the library grid", () => {
+  const { container } = renderCard(
+    <GameCard
+      appearance="library"
+      game={{
+        ...INSTALLED_CS2,
+        name: "Hades II",
+        artwork: "https://cdn.example/home-art.jpg",
+      }}
+      onLaunch={vi.fn()}
+      onInstall={vi.fn()}
+    />,
+  );
+
+  const article = container.querySelector("article");
+  expect(article).toHaveAttribute("data-card-appearance", "library");
+  expect(article?.querySelector("[data-game-cover]")).toHaveClass(
+    "aspect-[1.9/1]",
+  );
+  expect(article?.querySelector("[data-game-status]")).toHaveTextContent(
+    "Instalado · Steam",
+  );
+  expect(article?.querySelector("img")).toHaveAttribute(
+    "src",
+    "https://cdn.cloudflare.steamstatic.com/steam/apps/730/library_600x900_2x.jpg",
+  );
 });

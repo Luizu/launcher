@@ -78,3 +78,28 @@ export function ArrowLeftIcon(props: AppIconProps) {
     </IconBase>
   );
 }
+
+export function DiscoverIcon(props: AppIconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="m12 3 7.5 9-7.5 9-7.5-9L12 3Z" />
+      <path d="m12 8 2.8 4-2.8 4-2.8-4L12 8Z" />
+    </IconBase>
+  );
+}
+
+export function ArrowUpDownIcon(props: AppIconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="m8 4-3 3 3 3M5 7h9M16 20l3-3-3-3M19 17h-9" />
+    </IconBase>
+  );
+}
+
+export function FilterIcon(props: AppIconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 6h16M7 12h10M10 18h4" />
+    </IconBase>
+  );
+}

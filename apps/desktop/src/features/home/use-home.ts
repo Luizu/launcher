@@ -119,16 +119,18 @@ export function useHome({
   );
 
   /**
-   * The floating selector's items: the installed games when any exist
-   * (unchanged behavior), else the top prioritized library games — the
-   * featured game itself included, capped at eight — so a machine with
-   * nothing installed still browses its library from the Home, and
-   * committing a focused tile to the hero never unmounts that tile (focus
-   * never drops to the body).
+   * The in-scene selector shows a short, glanceable strip. Installed games
+   * win when available; otherwise the top prioritized library games keep the
+   * Home useful before the first install. Four items match the approved
+   * composition and prevent a large library from becoming a second page on
+   * top of the hero.
    */
   const selectorGames = useMemo(() => {
-    if (installed.length > 0) return installed;
-    return ranked.slice(0, 8);
+    if (installed.length > 0) {
+      const installedKeys = new Set(installed.map((game) => gameKey(game)));
+      return ranked.filter((game) => installedKeys.has(gameKey(game))).slice(0, 4);
+    }
+    return ranked.slice(0, 4);
   }, [installed, ranked]);
 
   const isStale = remote.connection?.syncStatus === "failed";

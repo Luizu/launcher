@@ -2,11 +2,16 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { LibraryGame } from "../../lib/merge-library";
 import { ActionButton } from "../../components/button/action-button";
-import { formatPlaytime } from "../../components/game-card/game-card";
+import {
+  formatPlaytime,
+  getTotalPlaytimeMinutes,
+  getRemoteLastPlayedAt,
+  formatLastActivity,
+} from "../../components/game-card/game-card";
 import { InlineStatus } from "../../components/status/inline-status";
 import { InstallStatus } from "../../components/status/install-status";
 import type { UseGameActionsResult } from "../game-library/use-game-actions";
-import { selectHeroMedia } from "../../lib/media-fallback";
+import { selectHeroMediaCandidates } from "../../lib/media-fallback";
 import { usePrefersReducedMotion } from "../../lib/use-media-query";
 import { providerLabel } from "../../lib/provider-label";
 import { gameKey } from "./select-featured-game";
@@ -19,6 +24,14 @@ const INSTALL_STATE_LABELS: Record<LibraryGame["installState"], string> = {
   installing: "Instalando",
   unknown: "Não verificado",
 };
+
+const HERO_PRIMARY_ACTION_CLASS =
+  "shadow-[0_10px_30px_rgba(140,245,208,0.16)]";
+
+function usableDescription(value: string | null | undefined): string | undefined {
+  const description = value?.trim();
+  return description ? description : undefined;
+}
 
 export interface HeroStageProps {
   game: LibraryGame;
@@ -53,7 +66,7 @@ function DerivedStageTitle({ name, ambient }: { name: string; ambient: boolean }
 /**
  * The stage for the featured game: best available media (catalog hero →
  * catalog other variants → provider artwork → derived title composition),
- * hero copy bottom-left, and the explicit primary action. Media pending,
+ * hero copy upper-left, and the explicit primary action. Media pending,
  * unmatched, failed, or stale never blocks rendering — missing media simply
  * walks down the fallback chain. The primary action (Jogar/Instalar) fires
  * only on an explicit click; focusing games never launches.
@@ -79,9 +92,19 @@ export function HeroStage({
   const ambient = !reducedMotion;
 
   const identity = game.catalogIdentity ?? null;
-  const mediaUrl = selectHeroMedia(identity, game.artwork);
+  const currentKey = gameKey(game);
+  const mediaCandidates = selectHeroMediaCandidates(
+    identity,
+    game.artwork,
+    game.provider,
+    game.externalGameId,
+  );
   const title = identity?.name ?? game.name;
-  const description = identity?.description ?? undefined;
+  const description =
+    usableDescription(identity?.description) ??
+    usableDescription(game.description);
+  const totalPlaytimeMinutes = getTotalPlaytimeMinutes(game);
+  const activityLabel = formatLastActivity(getRemoteLastPlayedAt(game));
 
   /** The media currently confirmed on stage (last `onLoad`), with its game. */
   const [displayed, setDisplayed] = useState<{
@@ -95,14 +118,23 @@ export function HeroStage({
    * fade-through-dark.
    */
   const [leaving, setLeaving] = useState<string | null>(null);
-  /** The game whose media url failed to load; its stage falls to the title. */
-  const [failedGameKey, setFailedGameKey] = useState<string | null>(null);
+  /** The last media layer confirmed by the browser; it gets the entrance animation. */
+  const [justDisplayedSrc, setJustDisplayedSrc] = useState<string | null>(null);
+  /** Failed candidates by game; the next candidate gets a chance. */
+  const [failedMedia, setFailedMedia] = useState<{
+    gameKey: string;
+    sources: string[];
+  } | null>(null);
 
-  const currentKey = gameKey(game);
-  // A media url that failed once for this game is treated as absent: the
-  // fallback chain's tail (derived title) takes over for that game.
+  // A failed candidate is skipped only for its own game. This lets a
+  // canonical Steam hero fall back to persisted/provider artwork without
+  // poisoning another game that happens to share the same URL.
   const targetMedia =
-    mediaUrl !== null && failedGameKey !== currentKey ? mediaUrl : null;
+    mediaCandidates.find(
+      (candidate) =>
+        failedMedia?.gameKey !== currentKey ||
+        !failedMedia.sources.includes(candidate),
+    ) ?? null;
 
   // The title composition renders instantly: when the fallback takes over,
   // drop both the confirmed media and any layer mid-fade so neither can
@@ -112,6 +144,7 @@ export function HeroStage({
   if (targetMedia === null && (displayed !== null || leaving !== null)) {
     setDisplayed(null);
     setLeaving(null);
+    setJustDisplayedSrc(null);
   }
 
   // A swap is pending when the target media differs from the confirmed one;
@@ -125,7 +158,7 @@ export function HeroStage({
     <ActionButton disabled>Verificando…</ActionButton>
   ) : game.installState === "installed" ? (
     <ActionButton
-      className="bg-[#f8fbff] text-[#0c1422] hover:bg-white focus-visible:ring-[#8cf5d0]"
+      className={HERO_PRIMARY_ACTION_CLASS}
       disabled={actions.isLaunching}
       onClick={() => void actions.launch(game)}
     >
@@ -133,7 +166,7 @@ export function HeroStage({
     </ActionButton>
   ) : game.installState === "not-installed" ? (
     <ActionButton
-      className="bg-[#f8fbff] text-[#0c1422] hover:bg-white focus-visible:ring-[#8cf5d0]"
+      className={HERO_PRIMARY_ACTION_CLASS}
       disabled={actions.isInstalling}
       onClick={() => void actions.install(game)}
     >
@@ -156,9 +189,10 @@ export function HeroStage({
               src={leaving}
               alt=""
               onTransitionEnd={() => setLeaving(null)}
-              className={`absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity motion-safe:duration-300 ${
+              onAnimationEnd={() => setLeaving(null)}
+              className={`absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity motion-safe:duration-450 ${
                 ambient ? "animate-ambient" : ""
-              }`}
+              } ${ambient ? "animate-media-out" : ""}`}
             />
           )}
           {previousSrc !== null && (
@@ -178,22 +212,52 @@ export function HeroStage({
               // First confirmation: the target simply takes the stage.
               if (displayed === null) {
                 setDisplayed({ src: targetMedia, gameKey: currentKey });
+                setJustDisplayedSrc(targetMedia);
               } else if (displayed.src !== targetMedia) {
                 // The pending layer is ready: the old layer starts its
                 // fade-out while this one fades in (fade-through).
                 setLeaving(displayed.src);
                 setDisplayed({ src: targetMedia, gameKey: currentKey });
+                setJustDisplayedSrc(targetMedia);
               }
             }}
-            onError={() => setFailedGameKey(currentKey)}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity motion-safe:duration-300 ${
+            onError={() =>
+              setFailedMedia((previous) => {
+                if (previous?.gameKey === currentKey) {
+                  return previous.sources.includes(targetMedia)
+                    ? previous
+                    : {
+                        gameKey: currentKey,
+                        sources: [...previous.sources, targetMedia],
+                      };
+                }
+                return { gameKey: currentKey, sources: [targetMedia] };
+              })
+            }
+            onAnimationEnd={() => {
+              if (justDisplayedSrc === targetMedia) {
+                setJustDisplayedSrc(null);
+              }
+            }}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity motion-safe:duration-450 ${
               swapPending ? "opacity-0" : "opacity-100"
-            } ${ambient ? "animate-ambient" : ""}`}
+            } ${ambient ? "animate-ambient" : ""} ${
+              ambient && justDisplayedSrc === targetMedia
+                ? "animate-media-in"
+                : ""
+            }`}
           />
         </>
       ) : (
         <DerivedStageTitle name={title} ambient={ambient} />
       )}
+      <div
+        aria-hidden="true"
+        data-cut-atmosphere
+        className="pointer-events-none absolute inset-0 z-[1] overflow-hidden"
+      >
+        <span className="absolute -right-[8%] -top-[18%] h-[290px] w-[450px] rotate-[-16deg] rounded-[50%] border border-[#8cf5d0]/40 shadow-[0_0_0_28px_rgba(140,245,208,0.05),0_0_0_58px_rgba(140,245,208,0.025)]" />
+      </div>
       {/* Legibility scrims: keep the copy and the selector readable on any art. */}
       <div
         aria-hidden="true"
@@ -204,47 +268,69 @@ export function HeroStage({
         className="absolute inset-0 bg-gradient-to-t from-[#050914] via-transparent to-black/20"
       />
 
-      <div className="absolute bottom-[9%] left-[7%] z-10 max-w-[52%] max-[800px]:max-w-[70%]">
-        <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#8cf5d0]">
+      <div
+        key={currentKey}
+        data-testid="hero-copy"
+        data-approved-hero-copy
+        className={`absolute left-[50px] top-[165px] z-10 max-w-[430px] max-[800px]:left-6 max-[800px]:top-[130px] max-[800px]:max-w-[70%] ${
+          ambient ? "animate-copy-in" : ""
+        }`}
+      >
+        <p className="mb-[15px] inline-flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.17em] text-[#8cf5d0]">
+          <span aria-hidden="true" className="h-0.5 w-6 rounded-full bg-[#8cf5d0]" />
           Continuar jogando
         </p>
-        {/* The keyed title replays the short copy-in on each selection change. */}
-        <h2
-          key={gameKey(game)}
-          className={`mt-3 text-[clamp(40px,5.5vw,88px)] font-black leading-[0.9] tracking-tight text-white ${
-            ambient ? "animate-copy-in" : ""
-          }`}
-        >
+        <h2 className="m-0 text-[clamp(44px,6vw,72px)] font-black leading-[0.88] tracking-[-0.09em] text-white [text-shadow:0_8px_38px_rgba(0,0,0,0.35)]">
           {title}
         </h2>
         {description !== undefined && (
-          <p className="mt-4 max-w-[570px] text-base leading-relaxed text-[#c8d3e4] max-[800px]:text-[13px]">
+          <p className="mt-[18px] max-w-[340px] text-[13px] leading-[1.55] text-white/75 [text-shadow:0_2px_16px_rgba(0,0,0,0.45)]">
             {description}
           </p>
         )}
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-[#c8d5e8]">
-          <span className="font-extrabold uppercase tracking-wider text-[#8cf5d0]">
-            {providerLabel(game.provider)}
-          </span>
-          {game.playtimeMinutes !== undefined && (
+        <div className="mt-5 flex flex-wrap items-center gap-[10px] text-[11px] text-white/65 [text-shadow:0_2px_12px_rgba(0,0,0,0.5)]">
+          <strong className="text-[#f2f6ff]">
+            {INSTALL_STATE_LABELS[game.installState]}
+          </strong>
+          {totalPlaytimeMinutes !== undefined &&
+            totalPlaytimeMinutes !== null && (
             <>
-              <span aria-hidden="true">•</span>
-              <span>{formatPlaytime(game.playtimeMinutes)}</span>
+              <span
+                aria-hidden="true"
+                data-cut-meta-dot
+                className="h-1 w-1 rounded-full bg-[#ff925e]"
+              />
+              <span>{formatPlaytime(totalPlaytimeMinutes)}</span>
             </>
           )}
-          <span aria-hidden="true">•</span>
-          <span>{INSTALL_STATE_LABELS[game.installState]}</span>
+          {activityLabel !== null && (
+            <>
+              <span
+                aria-hidden="true"
+                data-cut-meta-dot
+                className="h-1 w-1 rounded-full bg-[#ff925e]"
+              />
+              <span>{activityLabel}</span>
+            </>
+          )}
+          <span
+            aria-hidden="true"
+            data-cut-meta-dot
+            className="h-1 w-1 rounded-full bg-[#ff925e]"
+          />
+          <span>{providerLabel(game.provider)}</span>
           {isStale && (
             <span className="text-[10px] text-zinc-400">
               mostrando última sincronização
             </span>
           )}
         </div>
-        <div className="mt-5 flex items-center gap-3">
+        <div className="mt-7 flex items-center gap-[11px]">
           {primaryAction}
           {identity !== null && (
             <Link
               to={`/games/${identity.id}`}
+              data-discover
               className="inline-flex items-center justify-center rounded-md border border-[rgba(232,241,255,0.55)] bg-[rgba(3,8,17,0.35)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[rgba(3,8,17,0.6)] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
             >
               Detalhes

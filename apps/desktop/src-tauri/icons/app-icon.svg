@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
   <title>Fuse Launcher</title>
   <rect width="1024" height="1024" rx="220" fill="#07101B"/>
-  <path d="M214 174H820V350H398V462H744V622H398V850H214V174Z" fill="#8CF5D0"/>
-  <path d="M604 174H820L670 350H455L604 174Z" fill="#FF925E"/>
+  <path d="M224 176h592v176H416v128h336v160H416v208H224V176Z" fill="#8CF5D0"/>
+  <path d="m576 176 144 0-112 176H464l112-176Z" fill="#FF925E"/>
 </svg>

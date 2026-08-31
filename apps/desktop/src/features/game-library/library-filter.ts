@@ -49,7 +49,10 @@ export function filterGames(
 
 /** Last activity as a timestamp, or null when absent or unparsable. */
 function activityTime(game: LibraryGame): number | null {
-  const value = game.lastActivityAt;
+  const value =
+    game.remoteLastPlayedAt !== undefined
+      ? game.remoteLastPlayedAt
+      : game.lastActivityAt;
   if (value == null) return null;
   const time = new Date(value).getTime();
   return Number.isNaN(time) ? null : time;
@@ -98,8 +101,14 @@ export function sortGames(
     });
   } else if (sortKey === "playtime") {
     sorted.sort((a, b) => {
-      const aMinutes = a.playtimeMinutes ?? 0;
-      const bMinutes = b.playtimeMinutes ?? 0;
+      const aMinutes =
+        (a.playtimeTotalMinutes !== undefined
+          ? a.playtimeTotalMinutes
+          : a.playtimeMinutes) ?? 0;
+      const bMinutes =
+        (b.playtimeTotalMinutes !== undefined
+          ? b.playtimeTotalMinutes
+          : b.playtimeMinutes) ?? 0;
       return bMinutes - aMinutes || tieBreak(a, b);
     });
   }

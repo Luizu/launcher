@@ -139,6 +139,16 @@ const heroStage = () => screen.getByLabelText("Jogo em destaque");
 const selectorSection = () => screen.getByLabelText("Seletor de jogos");
 
 describe("HomePage", () => {
+  it("keeps the full-bleed stage inside the available Home height", () => {
+    renderHome({
+      entries: [entry({ catalogIdentity: CS2_IDENTITY })],
+      localGames: [LOCAL_CS2],
+    });
+
+    const homeRoot = heroStage().parentElement;
+    expect(homeRoot).toHaveClass("h-full", "min-h-0");
+  });
+
   it("shows the featured game with hero copy, media, and actions without opening the Library", () => {
     renderHome({
       entries: [
@@ -203,7 +213,7 @@ describe("HomePage", () => {
     expect(screen.queryByRole("button", { name: "Jogar" })).not.toBeInTheDocument();
   });
 
-  it("keeps the hero composed from provider artwork when catalog media is missing", () => {
+  it("prefers the canonical Steam hero when catalog media is missing", () => {
     renderHome({
       entries: [entry({ artwork: "https://cdn.example/provider-cs2.jpg" })],
       localGames: [LOCAL_CS2],
@@ -211,12 +221,31 @@ describe("HomePage", () => {
 
     expect(screen.getByRole("heading", { name: "Counter-Strike 2" })).toBeInTheDocument();
     const stageImage = heroStage().querySelector("img");
-    expect(stageImage).toHaveAttribute("src", "https://cdn.example/provider-cs2.jpg");
+    expect(stageImage).toHaveAttribute(
+      "src",
+      "https://cdn.cloudflare.steamstatic.com/steam/apps/730/library_hero.jpg",
+    );
     expect(screen.getByRole("button", { name: "Jogar" })).toBeInTheDocument();
   });
 
   it("derives a title composition when neither catalog nor provider media exists", () => {
-    renderHome({ entries: [entry({ artwork: null })], localGames: [LOCAL_CS2] });
+    renderHome({
+      entries: [
+        entry({
+          provider: "epic",
+          externalGameId: "730",
+          artwork: null,
+        }),
+      ],
+      localGames: [
+        {
+          provider: "epic",
+          externalGameId: 730,
+          name: "Counter-Strike 2",
+          state: "installed",
+        },
+      ],
+    });
 
     expect(screen.getByRole("heading", { name: "Counter-Strike 2" })).toBeInTheDocument();
     expect(heroStage().querySelector("img")).toBeNull();
@@ -236,23 +265,47 @@ describe("HomePage", () => {
     expect(screen.queryByLabelText("Jogo em destaque")).not.toBeNull();
   });
 
-  it("lists the installed games in the floating selector with count and active emphasis", () => {
+  it("lists the installed games in the bottom selector with active emphasis", () => {
     renderHome({
       entries: [entry({ catalogIdentity: CS2_IDENTITY })],
       localGames: [LOCAL_CS2, LOCAL_GARRY],
     });
 
     expect(screen.getByText("Jogos instalados")).toBeInTheDocument();
-    expect(screen.getByText("2 neste PC")).toBeInTheDocument();
-    // The selector floats inside the scene below the topbar with breathing
-    // room — never a bottom dock.
-    expect(selectorSection()).toHaveClass("absolute", "top-[145px]");
+    // The selector is part of the scene and anchored to the approved lower
+    // strip, not a second library section below the hero.
+    expect(selectorSection()).toHaveClass("absolute", "bottom-[35px]");
+    expect(selectorSection()).toHaveAttribute("data-approved-selector");
     // Its row scrolls horizontally for overflow.
     expect(within(selectorSection()).getByRole("list")).toHaveClass("overflow-x-auto");
     const featuredItem = screen.getByRole("button", { name: "Counter-Strike 2 (Steam)" });
     const otherItem = screen.getByRole("button", { name: "Garry's Mod (Steam)" });
     expect(featuredItem).toHaveAttribute("aria-current", "true");
     expect(otherItem).not.toHaveAttribute("aria-current");
+  });
+
+  it("caps the in-scene selector at four landscape tiles", () => {
+    const extraGames: LocalGame[] = Array.from({ length: 5 }, (_, index) => ({
+      provider: "steam" as const,
+      externalGameId: 7000 + index,
+      name: `Installed ${index + 1}`,
+      state: "installed" as const,
+    }));
+
+    renderHome({
+      entries: extraGames.map((game) =>
+        entry({
+          externalGameId: String(game.externalGameId),
+          name: game.name,
+          lastActivityAt: null,
+        }),
+      ),
+      localGames: extraGames,
+    });
+
+    const tiles = selectorSection().querySelectorAll("[data-game-key]");
+    expect(tiles).toHaveLength(4);
+    expect(tiles[0]).toHaveAttribute("data-selector-orientation", "landscape");
   });
 
   it("shows the selector with prioritized library games and a working Instalar when nothing is installed", async () => {
@@ -673,8 +726,8 @@ describe("HomePage responsividade e acessibilidade", () => {
       localGames: [LOCAL_CS2, LOCAL_GARRY],
     });
 
-    expect(selectorSection()).toHaveClass("top-[109px]");
-    expect(selectorSection()).not.toHaveClass("top-[145px]");
+    expect(selectorSection()).toHaveClass("bottom-5");
+    expect(selectorSection()).not.toHaveClass("bottom-[35px]");
     expect(within(selectorSection()).getByRole("list")).toHaveClass("overflow-x-auto");
   });
 

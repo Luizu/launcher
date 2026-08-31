@@ -209,6 +209,7 @@ it("carries catalog identity, enrichment status, and last activity from the remo
           provider: "steam",
           externalGameId: "730",
           name: "Counter-Strike 2",
+          description: "A competitive shooter built around precise teamwork.",
           lastActivityAt: "2026-08-28T10:00:00.000Z",
           enrichmentStatus: "enriched",
           catalogIdentity: {
@@ -229,6 +230,7 @@ it("carries catalog identity, enrichment status, and last activity from the remo
   expect(result[0]).toMatchObject({
     lastActivityAt: "2026-08-28T10:00:00.000Z",
     enrichmentStatus: "enriched",
+    description: "A competitive shooter built around precise teamwork.",
     catalogIdentity: { id: "identity-1", name: "Counter-Strike 2" },
   });
 });

@@ -28,7 +28,14 @@ export interface LibraryGame {
   provider: PlatformId;
   externalGameId: string;
   name: string;
+  /** Provider synopsis used by the Home when catalog description is absent. */
+  description?: string | null;
   artwork?: string | null;
+  /** Canonical provider total in minutes; null means the provider had no value. */
+  playtimeTotalMinutes?: number | null;
+  /** Rolling provider window in minutes, normally the last 14 days. */
+  playtimeRecent14dMinutes?: number | null;
+  /** @deprecated Compatibility alias for playtimeTotalMinutes. */
   playtimeMinutes?: number;
   installState: InstallState;
   /**
@@ -36,6 +43,8 @@ export interface LibraryGame {
    * local-only games (the provider never saw them).
    */
   lastActivityAt?: string | null;
+  /** Canonical provider activity instant. */
+  remoteLastPlayedAt?: string | null;
   /** Catalog enrichment state carried from the remote entry. */
   enrichmentStatus?: EnrichmentStatus;
   /** Catalog identity (name, description, media) carried from the remote
@@ -111,12 +120,16 @@ export function mergeLibrary(
       provider: entry.provider,
       externalGameId: normalizeId(entry.externalGameId),
       name: entry.name,
+      description: entry.description,
       artwork: entry.artwork,
+      playtimeTotalMinutes: entry.playtimeTotalMinutes,
+      playtimeRecent14dMinutes: entry.playtimeRecent14dMinutes,
       playtimeMinutes: entry.playtimeMinutes,
       installState: localGame
         ? LOCAL_STATE_TO_INSTALL[localGame.state]
         : "not-installed",
       lastActivityAt: entry.lastActivityAt,
+      remoteLastPlayedAt: entry.remoteLastPlayedAt,
       enrichmentStatus: entry.enrichmentStatus,
       catalogIdentity: entry.catalogIdentity,
     });

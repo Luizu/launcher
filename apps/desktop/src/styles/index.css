@@ -71,11 +71,46 @@ body {
   animation: copy-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Media transition: a soft scale settles the next artwork into the scene
+   while the outgoing layer eases away. The movement is deliberately short
+   and only applies when a featured game changes. */
+@keyframes media-in {
+  from {
+    opacity: 0;
+    transform: scale(1.025);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes media-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.995);
+  }
+}
+
+.animate-media-in {
+  animation: media-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-media-out {
+  animation: media-out 0.45s cubic-bezier(0.64, 0, 0.78, 0) both;
+}
+
 /* Reduced motion: kill every continuous loop regardless of the JS wiring and
    let transitions collapse to brief state/opacity changes. */
 @media (prefers-reduced-motion: reduce) {
   .animate-ambient,
-  .animate-copy-in {
+  .animate-copy-in,
+  .animate-media-in,
+  .animate-media-out {
     animation: none;
   }
 }

@@ -9,6 +9,11 @@ const TAURI_HTTP_API_ORIGINS = new Set([
   new URL(PRODUCTION_API_BASE_URL).origin,
 ]);
 
+const browserFetch: typeof globalThis.fetch = (input, init) =>
+  init === undefined
+    ? globalThis.fetch(input)
+    : globalThis.fetch(input, init);
+
 /** Whether the frontend is running inside a Tauri WebView. */
 export function isTauriRuntime(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -28,7 +33,7 @@ export function defaultHttpFetcher(
   baseUrl = DEFAULT_API_BASE_URL,
 ): typeof globalThis.fetch {
   if (!isTauriRuntime()) {
-    return globalThis.fetch;
+    return browserFetch;
   }
 
   try {
@@ -39,5 +44,5 @@ export function defaultHttpFetcher(
     // Invalid or unscoped URLs must not cross the native capability boundary.
   }
 
-  return globalThis.fetch;
+  return browserFetch;
 }

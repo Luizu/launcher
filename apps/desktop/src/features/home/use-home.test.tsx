@@ -406,7 +406,7 @@ describe("useHome", () => {
     expect(screen.getByText("instalados: 0")).toBeInTheDocument();
   });
 
-  it("caps the fallback selector at eight games", () => {
+  it("caps the fallback selector at four games", () => {
     const entries = Array.from({ length: 10 }, (_, index) => ({
       ...REMOTE_CS2,
       externalGameId: String(1000 + index),
@@ -421,9 +421,9 @@ describe("useHome", () => {
     });
 
     // Nothing is prioritized: the featured game is the first by name
-    // ("Game 1"), and the selector holds the top eight including it.
+    // ("Game 1"), and the selector holds the top four including it.
     expect(screen.getByRole("heading", { name: "Game 1" })).toBeInTheDocument();
-    expect(screen.getAllByText(/^seletor: Game/)).toHaveLength(8);
+    expect(screen.getAllByText(/^seletor: Game/)).toHaveLength(4);
     expect(screen.getByText("seletor: Game 1")).toBeInTheDocument();
   });
 });

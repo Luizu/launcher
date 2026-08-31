@@ -17,11 +17,12 @@ import {
   SettingsIcon,
   SearchIcon,
   ChevronDownIcon,
+  DiscoverIcon,
 } from "../../components/icons/app-icon";
 
 /**
  * The hybrid shell frame around all authenticated destinations: a compact
- * sidebar (brand, Home, Biblioteca, settings placeholder) plus a topbar
+ * sidebar (brand, Home, Biblioteca, Discover) plus a topbar
  * with the current destination context and the reserved global controls
  * (busca, usuário, configurações). No permanent sync status lives here.
  * Below the compact breakpoint (~800px) the rail and the topbar shrink and
@@ -64,14 +65,20 @@ export function ShellSidebar() {
   return (
     <aside
       aria-label="Menu principal"
-      className={`flex shrink-0 flex-col border-r border-[rgba(177,207,241,0.16)] bg-[#050914] ${
-        compact ? "w-[64px] items-center gap-5 px-2 py-5" : "w-[224px] gap-8 px-4 py-6"
+      className={`flex shrink-0 flex-col border-r border-[rgba(177,207,241,0.16)] bg-[#06101b] ${
+        compact
+          ? "w-[64px] items-center gap-5 px-2 py-5"
+          : "w-[86px] items-center gap-5 px-0 py-6"
       }`}
     >
-      <FuseLogo compact={compact} className={compact ? "justify-center" : "w-full"} />
+      <FuseLogo
+        compact={compact}
+        showWordmark={!compact}
+        className="justify-center"
+      />
       <nav
         aria-label="Destinos"
-        className={`flex flex-col gap-2 ${compact ? "items-center" : "w-full"}`}
+        className="mt-[21px] flex flex-col items-center gap-[9px]"
       >
         {SIDEBAR_NAV_ITEMS.map(({ to, label, Icon }) => (
           <NavLink
@@ -79,11 +86,7 @@ export function ShellSidebar() {
             to={to}
             aria-label={label}
             className={({ isActive }) =>
-              `flex items-center rounded-xl transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8cf5d0] ${
-                compact
-                  ? "h-10 w-10 justify-center"
-                  : "h-11 w-full gap-3 px-3"
-              } ${
+              `grid h-[43px] w-[43px] place-items-center rounded-xl transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8cf5d0] ${
                 isActive
                   ? "bg-[#8cf5d0] text-[#0d1622]"
                   : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100"
@@ -91,31 +94,25 @@ export function ShellSidebar() {
             }
           >
             <Icon className="h-[18px] w-[18px] shrink-0" />
-            {!compact && <span className="text-sm font-semibold">{label}</span>}
           </NavLink>
         ))}
-      </nav>
-      <div className={`mt-auto ${compact ? "flex flex-col items-center" : "w-full"}`}>
-        <span
-          aria-label={`Versão da aplicação: ${displayVersion}`}
-          title={`Versão da aplicação: ${displayVersion}`}
-          className={`mb-3 block font-mono text-[10px] text-zinc-500 ${
-            compact ? "[writing-mode:vertical-rl]" : ""
-          }`}
-        >
-          {displayVersion}
-        </span>
         <button
           type="button"
           disabled
-          aria-label="Configurações"
-          className={`flex items-center rounded-xl text-zinc-600 ${
-            compact ? "h-10 w-10 justify-center" : "h-11 w-full gap-3 px-3"
-          }`}
+          aria-label="Descobrir"
+          className="grid h-[43px] w-[43px] place-items-center rounded-xl text-[#70849d] transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8cf5d0] disabled:cursor-not-allowed"
         >
-          <SettingsIcon className="h-[18px] w-[18px] shrink-0" />
-          {!compact && <span className="text-sm font-semibold">Configurações</span>}
+          <DiscoverIcon className="h-[18px] w-[18px]" />
         </button>
+      </nav>
+      <div className="sr-only">
+        <span
+          aria-label={`Versão da aplicação: ${displayVersion}`}
+          title={`Versão da aplicação: ${displayVersion}`}
+          className="font-mono text-[10px] text-zinc-500"
+        >
+          {displayVersion}
+        </span>
       </div>
     </aside>
   );
@@ -128,7 +125,7 @@ export function ShellTopbar() {
   return (
     <header
       className={`absolute inset-x-0 top-0 z-20 flex items-center gap-6 border-b border-[rgba(177,207,241,0.15)] bg-[linear-gradient(180deg,rgba(5,9,20,0.84),rgba(5,9,20,0))] ${
-        compact ? "h-[58px] px-5" : "h-[72px] px-6"
+        compact ? "h-[58px] px-5" : "h-[86px] px-[34px]"
       }`}
     >
       <p className="text-sm font-bold tracking-tight text-white/90">
@@ -136,14 +133,17 @@ export function ShellTopbar() {
       </p>
       <div className="ml-auto flex min-w-0 items-center gap-3">
         {!compact && (
-          <div className="relative w-52">
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+          <div
+            data-testid="approved-search"
+            className="relative flex h-[35px] w-[205px] min-w-[150px] flex-[1_1_205px] items-center gap-2 overflow-hidden rounded-[9px] border border-white/[0.24] bg-[rgba(5,12,22,0.28)] px-3 shadow-[0_8px_24px_rgba(0,0,0,0.13)] backdrop-blur-xl"
+          >
+            <SearchIcon className="pointer-events-none h-3.5 w-3.5 shrink-0 text-zinc-400" />
             <input
               type="search"
               disabled
               placeholder="Buscar jogos"
               aria-label="Buscar"
-              className="h-10 w-full cursor-not-allowed rounded-lg border border-white/10 bg-black/20 pl-9 pr-3 text-sm text-zinc-400 placeholder:text-zinc-500"
+              className="h-full min-w-0 flex-1 bg-transparent p-0 text-[11px] text-zinc-300 outline-none placeholder:text-zinc-500"
             />
           </div>
         )}
@@ -203,8 +203,8 @@ function UserMenu({ compact }: { compact: boolean }) {
         title={displayName}
         className={`flex shrink-0 items-center rounded-full border border-[#8799b7] bg-white/10 text-xs font-bold text-zinc-100 transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8cf5d0] ${
           compact
-            ? "h-10 w-10 justify-center"
-            : "h-10 min-w-[180px] max-w-[300px] gap-2 px-1.5 pr-3"
+            ? "h-[43px] w-[43px] justify-center"
+            : "h-[43px] min-w-[178px] max-w-[300px] basis-[178px] gap-2 px-1.5 pr-3"
         }`}
       >
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#8cf5d0] text-[10px] font-black text-[#0d1622]">

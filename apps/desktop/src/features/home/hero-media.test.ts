@@ -2,6 +2,7 @@ import type { GameCatalogIdentity } from "@fuse-launcher/contracts";
 import {
   selectGamePageMedia,
   selectHeroMedia,
+  selectLibraryCover,
   selectSelectorCover,
 } from "../../lib/media-fallback";
 
@@ -145,6 +146,19 @@ describe("selectHeroMedia", () => {
     );
   });
 
+  it("prefers the canonical Steam library hero over cached provider artwork", () => {
+    expect(
+      selectHeroMedia(
+        null,
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/730/ss_old.jpg",
+        "steam",
+        "730",
+      ),
+    ).toBe(
+      "https://cdn.cloudflare.steamstatic.com/steam/apps/730/library_hero.jpg",
+    );
+  });
+
   it("returns null when nothing is available (derived title fallback)", () => {
     expect(selectHeroMedia(null, null)).toBeNull();
     expect(selectHeroMedia(identity({}), undefined)).toBeNull();
@@ -240,5 +254,42 @@ describe("selectSelectorCover", () => {
     expect(selectSelectorCover(null, "https://cdn.example/provider.jpg")).toBe(
       "https://cdn.example/provider.jpg",
     );
+  });
+});
+
+describe("selectLibraryCover", () => {
+  it("uses the catalog selector cover when it exists", () => {
+    expect(
+      selectLibraryCover(
+        identity({ cover: [SELECTOR] }),
+        "steam",
+        "730",
+        "https://cdn.example/home-art.jpg",
+      ),
+    ).toBe("https://cdn.example/selector.jpg");
+  });
+
+  it("keeps Steam library cards on cover media instead of Home artwork", () => {
+    expect(
+      selectLibraryCover(
+        null,
+        "steam",
+        "730",
+        "https://cdn.example/home-art.jpg",
+      ),
+    ).toBe(
+      "https://cdn.cloudflare.steamstatic.com/steam/apps/730/library_600x900_2x.jpg",
+    );
+  });
+
+  it("falls back to provider artwork for non-Steam games without catalog media", () => {
+    expect(
+      selectLibraryCover(
+        null,
+        "epic",
+        "game-1",
+        "https://cdn.example/provider-cover.jpg",
+      ),
+    ).toBe("https://cdn.example/provider-cover.jpg");
   });
 });

@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { EnrichmentStatus } from "@fuse-launcher/contracts";
-import { selectSelectorCover, titleInitials } from "../../lib/media-fallback";
+import {
+  selectLibraryCover,
+  selectSelectorCover,
+  titleInitials,
+} from "../../lib/media-fallback";
 import { providerLabel } from "../../lib/provider-label";
 import type { LibraryGame } from "../../lib/merge-library";
 import { ActionButton } from "../button/action-button";
@@ -9,6 +13,8 @@ import { InstallStatus } from "../status/install-status";
 
 export interface GameCardProps {
   game: LibraryGame;
+  /** The reference-style landscape treatment used by Biblioteca. */
+  appearance?: "default" | "library";
   /** Dispatches a launch for an installed game; wired by `useGameActions`. */
   onLaunch?: (game: LibraryGame) => void | Promise<void>;
   /** Requests installation for a remote not-installed game. */
@@ -31,11 +37,58 @@ export function formatPlaytime(minutes: number): string {
   return rest === 0 ? `${hours}h jogados` : `${hours}h${rest} jogados`;
 }
 
+/** Compact duration used by the progress summary on a game detail page. */
+export function formatPlaytimeCompact(minutes: number): string {
+  const normalized = Math.max(0, Math.floor(minutes));
+  if (normalized < 60) return `${normalized} min`;
+  const hours = Math.floor(normalized / 60);
+  const rest = normalized % 60;
+  return rest === 0 ? `${hours}h` : `${hours}h ${rest}m`;
+}
+
+/** Reads canonical playtime without turning an explicit unknown into zero. */
+export function getTotalPlaytimeMinutes(
+  game: Pick<LibraryGame, "playtimeTotalMinutes" | "playtimeMinutes">,
+): number | null | undefined {
+  return game.playtimeTotalMinutes !== undefined
+    ? game.playtimeTotalMinutes
+    : game.playtimeMinutes;
+}
+
+/** Reads canonical remote activity without falling back from an explicit null. */
+export function getRemoteLastPlayedAt(
+  game: Pick<LibraryGame, "remoteLastPlayedAt" | "lastActivityAt">,
+): string | null | undefined {
+  return game.remoteLastPlayedAt !== undefined
+    ? game.remoteLastPlayedAt
+    : game.lastActivityAt;
+}
+
+/** Absolute PT-BR date keeps the remote activity precise and timezone-stable. */
+export function formatLastActivity(
+  value: string | null | undefined,
+): string | null {
+  if (value === null || value === undefined) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  return `Jogado em ${day}/${month}/${date.getUTCFullYear()}`;
+}
+
 /** Entry-level copy for catalog states that are not ready; nothing blocks. */
 const ENRICHMENT_LABELS: Partial<Record<EnrichmentStatus, string>> = {
   pending: "Atualizando capa",
   failed: "Catálogo indisponível",
   unmatched: "Sem dados de catálogo",
+};
+
+const INSTALL_STATE_LABELS: Record<LibraryGame["installState"], string> = {
+  installed: "Instalado",
+  "not-installed": "Não instalado",
+  installing: "Instalando",
+  unknown: "Não verificado",
 };
 
 /**
@@ -51,6 +104,7 @@ const ENRICHMENT_LABELS: Partial<Record<EnrichmentStatus, string>> = {
  */
 export function GameCard({
   game,
+  appearance = "default",
   onLaunch,
   onInstall,
   onCheckSteam,
@@ -87,14 +141,38 @@ export function GameCard({
 
   const identity = game.catalogIdentity ?? null;
   const title = identity?.name ?? game.name;
-  const coverUrl = selectSelectorCover(identity, game.artwork);
+  const isLibraryAppearance = appearance === "library";
+  const coverUrl = isLibraryAppearance
+    ? selectLibraryCover(
+        identity,
+        game.provider,
+        game.externalGameId,
+        game.artwork,
+      )
+    : selectSelectorCover(identity, game.artwork);
   const enrichmentLabel = game.enrichmentStatus
     ? ENRICHMENT_LABELS[game.enrichmentStatus]
     : undefined;
+  const totalPlaytimeMinutes = getTotalPlaytimeMinutes(game);
+  const activityLabel = formatLastActivity(getRemoteLastPlayedAt(game));
 
   return (
-    <article className="group flex min-w-0 flex-col gap-3 rounded-2xl border border-white/10 bg-[#0b1322]/80 p-3 shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition-colors hover:border-[#8cf5d0]/30">
-      <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#111b2d]">
+    <article
+      data-card-appearance={appearance}
+      className={
+        isLibraryAppearance
+          ? "group relative min-w-0"
+          : "group flex min-w-0 flex-col gap-3 rounded-2xl border border-white/10 bg-[#0b1322]/80 p-3 shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition-colors hover:border-[#8cf5d0]/30"
+      }
+    >
+      <div
+        data-game-cover
+        className={
+          isLibraryAppearance
+            ? "relative aspect-[1.9/1] w-full overflow-hidden rounded-[8px] border border-white/10 bg-[#1c2c42] shadow-[0_8px_18px_rgba(0,0,0,0.25)]"
+            : "aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#111b2d]"
+        }
+      >
         {coverUrl !== null ? (
           <img
             src={coverUrl}
@@ -113,28 +191,93 @@ export function GameCard({
             </span>
           </div>
         )}
+        {isLibraryAppearance && (
+          <span
+            aria-hidden="true"
+            data-game-status-bar
+            className={`absolute bottom-2 left-2 right-2 h-[3px] rounded-full ${
+              game.installState === "installed" ? "bg-[#8cf5d0]" : "bg-white/15"
+            }`}
+          />
+        )}
       </div>
-      <div className="flex min-w-0 flex-col gap-1">
+      <div
+        className={
+          isLibraryAppearance
+            ? "mt-[9px] flex min-w-0 flex-col gap-1"
+            : "flex min-w-0 flex-col gap-1"
+        }
+      >
         {identity !== null ? (
           <Link
             to={`/games/${identity.id}`}
-            className="truncate text-sm font-medium text-zinc-100 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8cf5d0]"
+            className={`truncate transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8cf5d0] ${
+              isLibraryAppearance
+                ? "text-[11px] font-extrabold text-[#f2f6ff]"
+                : "text-sm font-medium text-zinc-100"
+            }`}
           >
             {title}
           </Link>
         ) : (
-          <h3 className="truncate text-sm font-medium text-zinc-100">{title}</h3>
+          <h3
+            className={`truncate ${
+              isLibraryAppearance
+                ? "text-[11px] font-extrabold text-[#f2f6ff]"
+                : "text-sm font-medium text-zinc-100"
+            }`}
+          >
+            {title}
+          </h3>
         )}
-        {game.playtimeMinutes !== undefined && (
-          <p className="text-xs text-zinc-500">
-            {formatPlaytime(game.playtimeMinutes)}
-          </p>
+        {isLibraryAppearance ? (
+          <>
+            <p data-game-status className="text-[9px] text-[#71849c]">
+              <span>{INSTALL_STATE_LABELS[game.installState]}</span>
+              <span aria-hidden="true"> · </span>
+              <span>{providerLabel(game.provider)}</span>
+            </p>
+            {(totalPlaytimeMinutes !== undefined &&
+              totalPlaytimeMinutes !== null) ||
+            activityLabel !== null ? (
+              <p className="truncate text-[9px] text-[#71849c]">
+                {totalPlaytimeMinutes !== undefined &&
+                totalPlaytimeMinutes !== null
+                  ? formatPlaytimeCompact(totalPlaytimeMinutes)
+                  : null}
+                {totalPlaytimeMinutes !== undefined &&
+                  totalPlaytimeMinutes !== null &&
+                  activityLabel !== null && (
+                    <span aria-hidden="true"> · </span>
+                  )}
+                {activityLabel}
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <div className="flex flex-col gap-0.5">
+            {totalPlaytimeMinutes !== undefined &&
+              totalPlaytimeMinutes !== null && (
+                <p className="text-xs text-zinc-500">
+                  {formatPlaytime(totalPlaytimeMinutes)}
+                </p>
+              )}
+            {activityLabel !== null && (
+              <p className="text-[10px] text-zinc-500">{activityLabel}</p>
+            )}
+          </div>
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex w-fit items-center rounded bg-[#111b2d] px-1.5 py-0.5 text-[10px] font-medium text-[#9eabc0]">
-          {providerLabel(game.provider)}
-        </span>
+      <div
+        className={`flex flex-wrap items-center gap-2 ${
+          isLibraryAppearance ? "sr-only" : ""
+        }`}
+      >
+        {!isLibraryAppearance && (
+          <span className="inline-flex w-fit items-center rounded bg-[#111b2d] px-1.5 py-0.5 text-[10px] font-medium text-[#9eabc0]">
+            {providerLabel(game.provider)}
+          </span>
+        )}
         {enrichmentLabel !== undefined && (
           <span className="inline-flex items-center gap-1 text-[10px] text-zinc-500">
             <span
@@ -145,7 +288,15 @@ export function GameCard({
           </span>
         )}
       </div>
-      <div className="mt-auto">{action}</div>
+      <div
+        className={
+          isLibraryAppearance
+            ? "pointer-events-none absolute inset-x-2 top-2 flex justify-end opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
+            : "mt-auto"
+        }
+      >
+        {action}
+      </div>
     </article>
   );
 }

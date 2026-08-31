@@ -26,4 +26,17 @@ describe("global styles", () => {
     expect(css).toMatch(/prefers-reduced-motion: reduce/);
     expect(css).toMatch(/prefers-reduced-motion: reduce[\s\S]*?animation:\s*none/);
   });
+
+  it("defines authored media transition classes and disables them for reduced motion", () => {
+    expect(css).toContain("@keyframes media-in");
+    expect(css).toContain("@keyframes media-out");
+    expect(css).toContain(".animate-media-in");
+    expect(css).toContain(".animate-media-out");
+    const reducedMotionBlock = css.slice(
+      css.indexOf("@media (prefers-reduced-motion: reduce)"),
+    );
+    expect(reducedMotionBlock).toContain(".animate-media-in");
+    expect(reducedMotionBlock).toContain(".animate-media-out");
+    expect(reducedMotionBlock).toContain("animation: none");
+  });
 });

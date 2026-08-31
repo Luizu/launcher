@@ -3,7 +3,10 @@ import type {
   GameCatalogIdentity,
   MediaPurpose,
   MediaVariant,
+  PlatformId,
 } from "@fuse-launcher/contracts";
+
+const STEAM_LIBRARY_CDN = "https://cdn.cloudflare.steamstatic.com/steam/apps";
 
 /** Scan order across the media groups; per-group order is the API's. */
 const VARIANT_GROUPS: ReadonlyArray<keyof CatalogIdentityMedia> = [
@@ -40,6 +43,70 @@ function coverVariant(identity: GameCatalogIdentity): MediaVariant | null {
   return best;
 }
 
+function steamAppId(
+  provider: PlatformId | null | undefined,
+  externalGameId: string | null | undefined,
+): string | null {
+  if (provider !== "steam" || externalGameId === null || externalGameId === undefined) {
+    return null;
+  }
+
+  const normalized = externalGameId.trim();
+  return /^\d+$/.test(normalized) ? String(Number(normalized)) : null;
+}
+
+function steamLibraryAsset(
+  provider: PlatformId | null | undefined,
+  externalGameId: string | null | undefined,
+  filename: string,
+): string | null {
+  const appId = steamAppId(provider, externalGameId);
+  return appId === null
+    ? null
+    : STEAM_LIBRARY_CDN + "/" + appId + "/" + filename;
+}
+
+function pushCandidate(
+  candidates: string[],
+  candidate: string | null | undefined,
+) {
+  if (
+    candidate !== null &&
+    candidate !== undefined &&
+    !candidates.includes(candidate)
+  ) {
+    candidates.push(candidate);
+  }
+}
+
+/**
+ * Ordered hero candidates. The canonical Steam library hero sits ahead of
+ * persisted provider artwork because the latter may be an old arbitrary
+ * gameplay screenshot. Keeping the tail candidate makes a missing Steam
+ * library asset degrade to the provider artwork instead of a blank stage.
+ */
+export function selectHeroMediaCandidates(
+  identity: GameCatalogIdentity | null,
+  providerArtwork?: string | null,
+  provider?: PlatformId | null,
+  externalGameId?: string | null,
+): string[] {
+  const candidates: string[] = [];
+  if (identity !== null) {
+    pushCandidate(candidates, bestVariant(identity, "hero")?.url);
+    pushCandidate(candidates, bestVariant(identity, "game-page")?.url);
+  }
+  pushCandidate(
+    candidates,
+    steamLibraryAsset(provider, externalGameId, "library_hero.jpg"),
+  );
+  if (identity !== null) {
+    pushCandidate(candidates, coverVariant(identity)?.url);
+  }
+  pushCandidate(candidates, providerArtwork);
+  return candidates;
+}
+
 /**
  * Best available hero media for the stage, in fallback order:
  * catalog `hero` variant (screenshot_huge or artwork) → catalog
@@ -52,16 +119,13 @@ function coverVariant(identity: GameCatalogIdentity): MediaVariant | null {
 export function selectHeroMedia(
   identity: GameCatalogIdentity | null,
   providerArtwork?: string | null,
+  provider?: PlatformId | null,
+  externalGameId?: string | null,
 ): string | null {
-  if (identity !== null) {
-    const hero = bestVariant(identity, "hero");
-    if (hero !== null) return hero.url;
-    const gamePage = bestVariant(identity, "game-page");
-    if (gamePage !== null) return gamePage.url;
-    const cover = coverVariant(identity);
-    if (cover !== null) return cover.url;
-  }
-  return providerArtwork ?? null;
+  return (
+    selectHeroMediaCandidates(identity, providerArtwork, provider, externalGameId)[0] ??
+    null
+  );
 }
 
 /**
@@ -98,6 +162,35 @@ export function selectSelectorCover(
     const cover = coverVariant(identity);
     if (cover !== null) return cover.url;
   }
+  return providerArtwork ?? null;
+}
+
+/**
+ * Library cards have a separate media role from the Home stage. Prefer the
+ * catalog's selector cover, then Steam's canonical library cover, and only
+ * use provider artwork for providers without a canonical cover URL. A Home
+ * hero image therefore cannot leak into a Steam library card when the
+ * catalog is pending or unmatched.
+ */
+export function selectLibraryCover(
+  identity: GameCatalogIdentity | null,
+  provider: PlatformId,
+  externalGameId: string,
+  providerArtwork?: string | null,
+): string | null {
+  if (identity !== null) {
+    const selector = bestVariant(identity, "selector");
+    if (selector !== null) return selector.url;
+    const cover = coverVariant(identity);
+    if (cover !== null) return cover.url;
+  }
+
+  const steamCover = steamLibraryAsset(
+    provider,
+    externalGameId,
+    "library_600x900_2x.jpg",
+  );
+  if (steamCover !== null) return steamCover;
   return providerArtwork ?? null;
 }
 

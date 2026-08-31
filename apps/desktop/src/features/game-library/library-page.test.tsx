@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
@@ -42,8 +42,11 @@ const EMPTY_SNAPSHOT: LocalLibrarySnapshot = { games: [], diagnostics: [] };
 
 function gameLibraryClient(
   list: () => Promise<GameLibraryResponse>,
+  sync: () => Promise<{ status: "synced" }> = vi
+    .fn()
+    .mockResolvedValue({ status: "synced" }),
 ): GameLibraryClientLike {
-  return { list, sync: vi.fn().mockResolvedValue({ status: "synced" }) };
+  return { list, sync };
 }
 
 function localLibraryClient(
@@ -68,6 +71,7 @@ function renderPage({ list, scan, openUrl, tauri }: RenderPageOptions = {}) {
     vi.fn().mockResolvedValue({ connection: SYNCED_PUBLIC, entries: [] });
   const scanFn = scan ?? vi.fn().mockResolvedValue(EMPTY_SNAPSHOT);
   const openUrlFn = openUrl ?? vi.fn().mockResolvedValue(undefined);
+  const syncFn = vi.fn().mockResolvedValue({ status: "synced" as const });
 
   render(
     <QueryClientProvider client={queryClient}>
@@ -83,14 +87,18 @@ function renderPage({ list, scan, openUrl, tauri }: RenderPageOptions = {}) {
             }),
             getSteamLinkStatus: vi.fn(),
           }}
-          gameLibrary={gameLibraryClient(listFn)}
+          gameLibrary={gameLibraryClient(listFn, syncFn)}
           localLibrary={localLibraryClient(scanFn)}
         />
       </MemoryRouter>
     </QueryClientProvider>,
   );
 
-  return { list: listFn, scan: scanFn, openUrl: openUrlFn };
+  return { list: listFn, scan: scanFn, openUrl: openUrlFn, sync: syncFn };
+}
+
+function openLibraryFilters() {
+  fireEvent.click(screen.getByRole("button", { name: "Filtros" }));
 }
 
 it("shows a skeleton while the library loads", () => {
@@ -177,6 +185,51 @@ it("lists a remote game with the install action", async () => {
 
   expect(await screen.findByText("Counter-Strike 2")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Instalar" })).toBeInTheDocument();
+});
+
+it("matches the approved ready-state library composition", async () => {
+  renderPage({
+    list: vi.fn().mockResolvedValue({
+      connection: SYNCED_PUBLIC,
+      entries: [
+        { provider: "steam", externalGameId: "730", name: "Hades II" },
+        { provider: "steam", externalGameId: "4000", name: "Balatro" },
+      ],
+    }),
+  });
+
+  await screen.findAllByRole("article");
+  expect(screen.getByRole("heading", { name: "Biblioteca" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Filtros" })).toBeInTheDocument();
+  expect(screen.getByRole("tab", { name: "Todos" })).toBeInTheDocument();
+  expect(screen.getByRole("tab", { name: "Instalados" })).toBeInTheDocument();
+  expect(screen.getByRole("tab", { name: "Steam" })).toBeInTheDocument();
+  expect(screen.queryByText("Sincronizada")).not.toBeInTheDocument();
+  expect(screen.queryByText("Steam não conectada")).not.toBeInTheDocument();
+
+  const grid = screen.getByRole("list", { name: "Jogos da biblioteca" });
+  expect(grid).toHaveClass("lg:grid-cols-5");
+  expect(screen.getAllByRole("article")).toHaveLength(2);
+  expect(screen.getAllByRole("article")[0]).toHaveAttribute(
+    "data-card-appearance",
+    "library",
+  );
+});
+
+it("keeps manual library sync available inside the compact filters disclosure", async () => {
+  const user = userEvent.setup();
+  const { sync } = renderPage({
+    list: vi.fn().mockResolvedValue({
+      connection: SYNCED_PUBLIC,
+      entries: [REMOTE_CS2],
+    }),
+  });
+
+  await screen.findAllByRole("article");
+  openLibraryFilters();
+  await user.click(screen.getByRole("button", { name: "Atualizar biblioteca" }));
+
+  await waitFor(() => expect(sync).toHaveBeenCalledTimes(1));
 });
 
 it("marks a locally installed game as launchable", async () => {
@@ -390,10 +443,27 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     // never force the page wider than the window.
     const grid = screen.getByRole("list");
     expect(grid).toHaveClass("grid");
-    expect(grid).toHaveClass("grid-cols-[repeat(auto-fill,minmax(200px,1fr))]");
+    expect(grid).toHaveClass("lg:grid-cols-5");
     for (const item of screen.getAllByRole("listitem")) {
       expect(item).toHaveClass("min-w-0");
     }
+  });
+
+  it("keeps the library screen as the scrolling viewport", async () => {
+    renderPage({
+      list: vi.fn().mockResolvedValue({
+        connection: SYNCED_PUBLIC,
+        entries: [REMOTE_CS2],
+      }),
+    });
+
+    await screen.findByText("Counter-Strike 2");
+
+    expect(document.querySelector("[data-library-screen]")).toHaveClass(
+      "h-full",
+      "min-h-0",
+      "overflow-y-auto",
+    );
   });
 
   it("filters cards case-insensitively and predictably as the query changes", async () => {
@@ -410,6 +480,7 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     });
 
     await screen.findByText("Counter-Strike 2");
+    openLibraryFilters();
 
     const search = screen.getByLabelText("Buscar na biblioteca");
     await user.type(search, "cOuNtEr");
@@ -442,6 +513,7 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     });
 
     await screen.findByText("Portal 2");
+    openLibraryFilters();
     await user.type(screen.getByLabelText("Buscar na biblioteca"), "portal 2");
 
     expect(screen.getAllByRole("article")).toHaveLength(1);
@@ -462,6 +534,7 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     });
 
     await screen.findByText("Counter-Strike 2");
+    openLibraryFilters();
     expect(screen.getByText("3 jogos")).toBeInTheDocument();
 
     const search = screen.getByLabelText("Buscar na biblioteca");
@@ -492,6 +565,7 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     await screen.findByText("Counter-Strike 2");
     expect(screen.getAllByRole("article")).toHaveLength(2);
 
+    openLibraryFilters();
     await user.click(screen.getByLabelText("Somente instalados"));
     expect(screen.getAllByRole("article")).toHaveLength(1);
     expect(screen.getByText("Counter-Strike 2")).toBeInTheDocument();
@@ -527,6 +601,7 @@ describe("grid, search, filters, sorting, and keyboard", () => {
 
     await screen.findByText("Counter-Strike 2");
 
+    openLibraryFilters();
     const select = screen.getByLabelText("Provedor");
     expect(screen.getByRole("option", { name: "Todos" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "EPIC" })).toBeInTheDocument();
@@ -562,6 +637,7 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     await screen.findAllByText("Portal");
     expect(screen.getAllByRole("article")).toHaveLength(3);
 
+    openLibraryFilters();
     await user.type(screen.getByLabelText("Buscar na biblioteca"), "portal");
     expect(screen.getAllByRole("article")).toHaveLength(3);
 
@@ -729,7 +805,10 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     });
 
     const card = (await screen.findAllByRole("article"))[0];
-    expect(within(card).getByText("H")).toBeInTheDocument();
+    expect(card.querySelector("img")).toHaveAttribute(
+      "src",
+      "https://cdn.cloudflare.steamstatic.com/steam/apps/70/library_600x900_2x.jpg",
+    );
 
     await user.click(within(card).getByRole("button", { name: "Instalar" }));
     await waitFor(() => expect(install).toHaveBeenCalledWith(70));
@@ -754,6 +833,7 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     await screen.findAllByRole("article");
     expect(screen.getByText("120 jogos")).toBeInTheDocument();
 
+    openLibraryFilters();
     // "Jogo 1" matches the 3-digit names Jogo 100..Jogo 120 (21 games).
     await user.type(screen.getByLabelText("Buscar na biblioteca"), "jogo 1");
     expect(screen.getAllByRole("article")).toHaveLength(21);
@@ -778,6 +858,8 @@ describe("grid, search, filters, sorting, and keyboard", () => {
       }),
     });
 
+    await screen.findAllByRole("article");
+    openLibraryFilters();
     const search = await screen.findByLabelText("Buscar na biblioteca");
     await user.click(search);
     expect(search).toHaveFocus();
@@ -789,7 +871,22 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     expect(screen.getByLabelText("Provedor")).toHaveFocus();
 
     await user.tab();
+    expect(screen.getByRole("button", { name: "Atualizar biblioteca" })).toHaveFocus();
+
+    await user.tab();
     expect(screen.getByLabelText("Ordenar por")).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("tab", { name: "Todos" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("tab", { name: "Instalados" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("tab", { name: "Steam" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("tab", { name: "EPIC" })).toHaveFocus();
 
     await user.tab();
     expect(
@@ -806,6 +903,8 @@ describe("grid, search, filters, sorting, and keyboard", () => {
       }),
     });
 
+    await screen.findAllByRole("article");
+    openLibraryFilters();
     const search = await screen.findByLabelText("Buscar na biblioteca");
     await user.click(search);
 
@@ -813,7 +912,19 @@ describe("grid, search, filters, sorting, and keyboard", () => {
     expect(screen.getByLabelText("Somente instalados")).toHaveFocus();
 
     await user.tab();
+    expect(screen.getByRole("button", { name: "Atualizar biblioteca" })).toHaveFocus();
+
+    await user.tab();
     expect(screen.getByLabelText("Ordenar por")).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("tab", { name: "Todos" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("tab", { name: "Instalados" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("tab", { name: "Steam" })).toHaveFocus();
 
     await user.tab();
     expect(screen.getByRole("button", { name: "Instalar" })).toHaveFocus();

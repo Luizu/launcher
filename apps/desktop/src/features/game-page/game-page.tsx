@@ -1,8 +1,16 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { EnrichmentStatus, LocalLibrarySnapshot } from "@fuse-launcher/contracts";
+import type {
+  EnrichmentStatus,
+  GamePageEntry,
+  LocalLibrarySnapshot,
+} from "@fuse-launcher/contracts";
 import { ActionButton } from "../../components/button/action-button";
-import { formatPlaytime } from "../../components/game-card/game-card";
+import {
+  formatPlaytime,
+  formatPlaytimeCompact,
+  getTotalPlaytimeMinutes,
+} from "../../components/game-card/game-card";
 import { InlineStatus } from "../../components/status/inline-status";
 import { InstallStatus } from "../../components/status/install-status";
 import {
@@ -31,6 +39,100 @@ const NOT_FOUND_MESSAGE = "Não encontramos este jogo.";
 const NOT_FOUND_HINT =
   "O link pode estar incorreto ou a página ainda não está disponível.";
 const COMMUNITY_COPY = "As comunidades chegam em breve.";
+
+function ProgressMetric({
+  label,
+  value,
+  detail,
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+}) {
+  return (
+    <div className="min-w-0 rounded-md bg-zinc-950/45 px-3 py-2">
+      <p className="truncate text-[10px] uppercase tracking-wider text-zinc-500">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-semibold text-zinc-100">{value}</p>
+      {detail !== undefined && (
+        <p className="mt-0.5 truncate text-[10px] text-zinc-500">{detail}</p>
+      )}
+    </div>
+  );
+}
+
+function GameProgressSummary({
+  entries,
+}: {
+  entries: ReadonlyArray<GamePageEntry>;
+}) {
+  if (entries.length === 0) return null;
+
+  return (
+    <section
+      aria-label="Seu progresso"
+      className="flex flex-col gap-3 rounded-lg border border-zinc-800 bg-zinc-900/35 p-4"
+    >
+      <div>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
+          Seu progresso
+        </h2>
+        <p className="mt-1 text-xs text-zinc-500">Resumo por plataforma.</p>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        {entries.map((entry) => {
+          const totalMinutes =
+            entry.playtimeTotalMinutes !== undefined
+              ? entry.playtimeTotalMinutes
+              : entry.playtimeMinutes;
+          const recentMinutes = entry.playtimeRecent14dMinutes;
+          const achievements = entry.achievements;
+          const total =
+            totalMinutes === undefined || totalMinutes === null
+              ? "—"
+              : formatPlaytimeCompact(totalMinutes);
+          const recent =
+            recentMinutes === undefined || recentMinutes === null
+              ? "—"
+              : formatPlaytimeCompact(recentMinutes);
+          const achievementValue =
+            achievements === undefined || achievements === null
+              ? "—"
+              : achievements.total === 0
+                ? "Nenhuma"
+                : `${achievements.achieved}/${achievements.total}`;
+
+          return (
+            <article
+              key={`${entry.provider}:${entry.externalGameId}`}
+              className="rounded-lg border border-zinc-800/80 bg-zinc-900/60 p-3"
+            >
+              <p className="mb-2 text-xs font-semibold text-zinc-300">
+                {providerLabel(entry.provider)}
+              </p>
+              <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
+                <ProgressMetric label="Tempo total" value={total} />
+                <ProgressMetric label="Últimos 14 dias" value={recent} />
+                <ProgressMetric
+                  label="Conquistas"
+                  value={achievementValue}
+                  detail={
+                    achievements !== undefined && achievements !== null
+                      ? achievements.total === 0
+                        ? "sem conquistas"
+                        : "desbloqueadas"
+                      : "ainda sem dados"
+                  }
+                />
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 /** Entry-level copy for catalog states that are not ready; nothing blocks. */
 const ENRICHMENT_LABELS: Partial<Record<EnrichmentStatus, string>> = {
@@ -102,15 +204,16 @@ function ProviderEntryRow({
   const enrichmentLabel = game.enrichmentStatus
     ? ENRICHMENT_LABELS[game.enrichmentStatus]
     : undefined;
+  const totalMinutes = getTotalPlaytimeMinutes(game);
 
   return (
     <li className="flex min-w-0 flex-wrap items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
       <span className="inline-flex w-fit items-center rounded bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-300">
         {providerLabel(game.provider)}
       </span>
-      {game.playtimeMinutes !== undefined && (
+      {totalMinutes !== undefined && totalMinutes !== null && (
         <span className="text-xs text-zinc-500">
-          {formatPlaytime(game.playtimeMinutes)}
+          {formatPlaytime(totalMinutes)}
         </span>
       )}
       {enrichmentLabel !== undefined && (
@@ -289,6 +392,8 @@ export function GamePage({
                 )}
             </div>
           </section>
+
+          <GameProgressSummary entries={page.data?.entries ?? []} />
 
           <section aria-label="Provedores" className="flex flex-col gap-3">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">

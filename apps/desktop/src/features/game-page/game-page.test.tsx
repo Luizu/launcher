@@ -273,6 +273,34 @@ describe("GamePage", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows a compact progress summary without exposing provider internals", async () => {
+    renderGamePage({
+      getGamePage: vi.fn().mockResolvedValue({
+        identity: { id: "identity-1", name: "Counter-Strike 2", media: {} },
+        entries: [
+          {
+            provider: "steam",
+            externalGameId: "730",
+            name: "Counter-Strike 2",
+            playtimeTotalMinutes: 2538,
+            playtimeRecent14dMinutes: 150,
+            remoteLastPlayedAt: "2026-08-30T10:00:00.000Z",
+            achievements: { achieved: 3, total: 42, fetchedAt: null },
+            enrichmentStatus: "enriched",
+          },
+        ],
+      }),
+    });
+
+    const summary = await screen.findByRole("region", {
+      name: "Seu progresso",
+    });
+    expect(within(summary).getByText("42h 18m")).toBeInTheDocument();
+    expect(within(summary).getByText("2h 30m")).toBeInTheDocument();
+    expect(within(summary).getByText("3/42")).toBeInTheDocument();
+    expect(within(summary).queryByText("730")).not.toBeInTheDocument();
+  });
+
   it("wires each row action to its own provider entry", async () => {
     const launch = vi.fn().mockResolvedValue({ accepted: true });
     const install = vi.fn().mockResolvedValue({ accepted: true });

@@ -17,10 +17,34 @@ export interface ExternalGame {
   provider: PlatformId;
   externalGameId: string;
   name: string;
+  /** Provider synopsis used when catalog enrichment has no description yet. */
+  description?: string | null;
+  /** Canonical provider total; Steam sends this value in minutes. */
+  playtimeTotalMinutes?: number | null;
+  /** Provider's rolling recent window; Steam currently reports 14 days. */
+  playtimeRecent14dMinutes?: number | null;
+  /** @deprecated Compatibility alias for playtimeTotalMinutes. */
   playtimeMinutes?: number;
   artwork?: string;
   /** Last known remote activity instant; null when the provider never saw any. */
   lastActivityAt?: Date | null;
+  /** Canonical provider activity field. */
+  remoteLastPlayedAt?: Date | null;
+}
+
+export interface ExternalAchievementDefinition {
+  apiName: string;
+  displayName: string;
+  description?: string | null;
+  iconUrl?: string | null;
+  iconGrayUrl?: string | null;
+  hidden?: boolean;
+}
+
+export interface ExternalAchievementProgress {
+  apiName: string;
+  achieved: boolean;
+  unlockedAt?: Date | null;
 }
 
 /** Catalog enrichment state, independent of the provider sync status. */
@@ -42,6 +66,24 @@ export interface CatalogIdentityMedia {
   screenshot?: MediaVariant[];
 }
 
+export interface AchievementSummary {
+  achieved: number;
+  total: number;
+  /** Instant at which the provider progress was observed. */
+  fetchedAt?: string | null;
+}
+
+export interface GameAchievement {
+  apiName: string;
+  displayName: string;
+  description?: string | null;
+  iconUrl?: string | null;
+  iconGrayUrl?: string | null;
+  hidden: boolean;
+  achieved: boolean;
+  unlockedAt?: string | null;
+}
+
 export interface GameCatalogIdentity {
   /** Stable catalog identity id (the CatalogIdentity cuid); addressable. */
   id: string;
@@ -56,10 +98,19 @@ export interface GameLibraryEntry {
   provider: PlatformId;
   externalGameId: string;
   name: string;
+  /** Provider synopsis used as the Home fallback before catalog enrichment. */
+  description?: string | null;
+  /** Canonical provider total in minutes. */
+  playtimeTotalMinutes?: number | null;
+  /** Rolling provider window in minutes, normally the last 14 days. */
+  playtimeRecent14dMinutes?: number | null;
+  /** @deprecated Compatibility alias for playtimeTotalMinutes. */
   playtimeMinutes?: number;
   artwork?: string | null;
   /** Last known remote activity instant as an ISO string; null when none. */
   lastActivityAt?: string | null;
+  /** Canonical provider activity instant as an ISO string. */
+  remoteLastPlayedAt?: string | null;
   enrichmentStatus: EnrichmentStatus;
   catalogIdentity: GameCatalogIdentity | null;
 }
@@ -85,9 +136,17 @@ export interface GamePageEntry {
   provider: PlatformId;
   externalGameId: string;
   name: string;
+  /** Canonical provider total in minutes. */
+  playtimeTotalMinutes?: number | null;
+  /** Rolling provider window in minutes, normally the last 14 days. */
+  playtimeRecent14dMinutes?: number | null;
+  /** @deprecated Compatibility alias for playtimeTotalMinutes. */
   playtimeMinutes?: number;
   /** Last known remote activity instant as an ISO string; null when none. */
   lastActivityAt?: string | null;
+  /** Canonical provider activity instant as an ISO string. */
+  remoteLastPlayedAt?: string | null;
+  achievements?: AchievementSummary | null;
   enrichmentStatus: EnrichmentStatus;
 }
 

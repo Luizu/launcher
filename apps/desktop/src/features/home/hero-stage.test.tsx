@@ -79,6 +79,55 @@ function stageElement(game: LibraryGame): ReactElement {
 }
 
 describe("HeroStage ambient motion", () => {
+  it("carries the CUT atmosphere and accents into the hero composition", () => {
+    render(stageElement(GAME_A));
+
+    const stage = screen.getByLabelText("Jogo em destaque");
+    expect(stage.querySelector("[data-cut-atmosphere]")).not.toBeNull();
+    expect(stage.querySelector("[data-cut-meta-dot]")).not.toBeNull();
+    expect(screen.getByText("Continuar jogando")).toHaveClass("inline-flex");
+    expect(screen.getByRole("button", { name: "Jogar" })).toHaveClass(
+      "bg-[#8cf5d0]",
+    );
+  });
+
+  it("positions the hero copy in the approved upper-left composition", () => {
+    render(stageElement(GAME_A));
+
+    const copy = screen.getByTestId("hero-copy");
+    expect(copy).toHaveClass("top-[165px]", "left-[50px]");
+    expect(copy).toHaveAttribute("data-approved-hero-copy");
+  });
+
+  it("renders the provider synopsis when catalog description is unavailable", () => {
+    render(
+      stageElement({
+        ...GAME_A,
+        description: "A competitive shooter built around precise teamwork.",
+      }),
+    );
+
+    expect(
+      screen.getByText("A competitive shooter built around precise teamwork."),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the catalog synopsis ahead of the provider fallback", () => {
+    render(
+      stageElement({
+        ...GAME_A,
+        description: "Provider fallback synopsis.",
+        catalogIdentity: {
+          ...GAME_A.catalogIdentity!,
+          description: "Catalog synopsis.",
+        },
+      }),
+    );
+
+    expect(screen.getByText("Catalog synopsis.")).toBeInTheDocument();
+    expect(screen.queryByText("Provider fallback synopsis.")).not.toBeInTheDocument();
+  });
+
   it("applies the continuous ambient loop to the hero media layer only", () => {
     render(stageElement(GAME_A));
 
@@ -98,16 +147,21 @@ describe("HeroStage ambient motion", () => {
 
   it("animates the featured title with a copy-in class, except under reduced motion", () => {
     const { unmount } = render(stageElement(GAME_A));
-    expect(
-      screen.getByRole("heading", { name: "Counter-Strike 2" }),
-    ).toHaveClass("animate-copy-in");
+    expect(screen.getByTestId("hero-copy")).toHaveClass("animate-copy-in");
     unmount();
 
     mockMatchMedia(REDUCED_MOTION_QUERY, true);
     render(stageElement(GAME_A));
-    expect(
-      screen.getByRole("heading", { name: "Counter-Strike 2" }),
-    ).not.toHaveClass("animate-copy-in");
+    expect(screen.getByTestId("hero-copy")).not.toHaveClass("animate-copy-in");
+  });
+
+  it("keeps only the authored orbit accent and no stray decorative dot", () => {
+    render(stageElement(GAME_A));
+
+    const atmosphere = screen
+      .getByLabelText("Jogo em destaque")
+      .querySelector("[data-cut-atmosphere]");
+    expect(atmosphere?.querySelectorAll(":scope > span")).toHaveLength(1);
   });
 });
 
@@ -134,8 +188,14 @@ describe("HeroStage selection transitions", () => {
 
     expect(stage.querySelector("img[src*='a-hero']")).not.toBeNull();
     expect(stage.querySelector("img[src*='a-hero']")).toHaveClass("opacity-0");
+    expect(stage.querySelector("img[src*='a-hero']")).toHaveClass(
+      "animate-media-out",
+    );
     expect(stage.querySelector("img[src*='b-hero']")).not.toBeNull();
     expect(stage.querySelector("img[src*='b-hero']")).not.toHaveClass("opacity-0");
+    expect(stage.querySelector("img[src*='b-hero']")).toHaveClass(
+      "animate-media-in",
+    );
 
     // Once the fade completes, the outgoing layer is released.
     fireEvent.transitionEnd(stage.querySelector("img[src*='a-hero']")!);
@@ -171,8 +231,14 @@ describe("HeroStage selection transitions", () => {
     rerender(stageElement(GAME_B));
     fireEvent.error(stage.querySelector("img[src*='b-hero']")!);
 
-    // The stage is never blank: the media that failed is replaced by the
-    // derived title composition of the featured game.
+    // The canonical Steam hero gets a chance after catalog media fails. Once
+    // every candidate is rejected, the stage is never blank: the derived
+    // title composition takes over.
+    const steamFallback = stage.querySelector(
+      "img[src*='library_hero']",
+    );
+    expect(steamFallback).not.toBeNull();
+    fireEvent.error(steamFallback!);
     expect(stage.querySelector("img")).toBeNull();
     expect(screen.getByRole("heading", { name: "Garry's Mod" })).toBeInTheDocument();
   });

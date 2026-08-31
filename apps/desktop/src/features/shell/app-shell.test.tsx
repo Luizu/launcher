@@ -59,10 +59,13 @@ it("keeps the sidebar with only Home and Biblioteca as destinations", async () =
   renderShell("/home");
 
   await screen.findByText("conteudo-home");
-  expect(within(screen.getByRole("complementary", { name: "Menu principal" })).getByText("Fuse")).toBeInTheDocument();
-  expect(within(screen.getByRole("complementary", { name: "Menu principal" })).getByText("Launcher")).toBeInTheDocument();
+  const sidebar = screen.getByRole("complementary", { name: "Menu principal" });
+  expect(sidebar).toHaveClass("w-[86px]");
+  expect(within(sidebar).getByText("FUSE")).toBeInTheDocument();
+  expect(within(sidebar).getByRole("img", { name: "Fuse Launcher" })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Biblioteca" })).toBeInTheDocument();
+  expect(within(sidebar).getByRole("button", { name: "Descobrir" })).toBeInTheDocument();
   expect(
     screen.queryByRole("link", { name: /descobrir|amigos|comunidades/i }),
   ).not.toBeInTheDocument();
@@ -136,6 +139,12 @@ it("reserves search, user and settings in the topbar without a sync indicator", 
   await screen.findByText("conteudo-biblioteca");
   const topbar = screen.getByRole("banner");
 
+  expect(topbar).toHaveClass("h-[86px]");
+  expect(within(topbar).getByTestId("approved-search")).toHaveClass(
+    "flex",
+    "h-[35px]",
+    "w-[205px]",
+  );
   expect(
     within(topbar).getByRole("searchbox", { name: "Buscar" }),
   ).toBeDisabled();
@@ -221,8 +230,8 @@ describe("AppShell compact window", () => {
     await screen.findByText("conteudo-home");
     expect(
       screen.getByRole("complementary", { name: "Menu principal" }),
-    ).toHaveClass("w-[224px]");
-    expect(screen.getByRole("banner")).toHaveClass("h-[72px]");
+    ).toHaveClass("w-[86px]");
+    expect(screen.getByRole("banner")).toHaveClass("h-[86px]");
     expect(
       within(screen.getByRole("banner")).getByRole("searchbox", { name: "Buscar" }),
     ).toBeInTheDocument();

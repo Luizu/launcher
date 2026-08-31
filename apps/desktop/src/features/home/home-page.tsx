@@ -19,12 +19,12 @@ export interface HomePageProps {
 }
 
 /**
- * The Home: a stage for the featured game (media chain with a derived title
- * fallback, hero copy bottom-left, explicit Jogar/Instalar action) plus the
- * floating selector of installed games inside the scene — never a bottom
- * dock. The composition owns the loading/empty states, the stale connection
- * note near the meta (the topbar stays indicator-free by design), and clear
- * access to the Library and to game pages when a catalog identity exists.
+ * The Home: a full-bleed stage for the featured game (media chain with a
+ * derived title fallback, upper-left hero copy, explicit Jogar/Instalar
+ * action) plus the bottom-anchored selector inside the scene. The composition
+ * owns the loading/empty states, the stale connection note near the meta (the
+ * topbar stays indicator-free by design), and clear access to the Library and
+ * to game pages when a catalog identity exists.
  */
 export function HomePage({
   gameLibrary,
@@ -44,7 +44,7 @@ export function HomePage({
   }
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden bg-[#050914]">
+    <div className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-[#050914]">
       <h1 className="sr-only">Home</h1>
       {home.featured === null ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
