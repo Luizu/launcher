@@ -1,4 +1,4 @@
-import type { SyncLibraryResult } from "@launcher/contracts";
+import type { SyncLibraryResult } from "@fuse-launcher/contracts";
 import { SyncCoordinator } from "./sync-coordinator";
 
 const SYNCED: SyncLibraryResult = { status: "synced" };

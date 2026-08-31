@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { GamePageResponse } from "@launcher/contracts";
+import type { GamePageResponse } from "@fuse-launcher/contracts";
 import { ApiClient, ApiClientError } from "../../lib/api-client";
 import {
   GamePagesClient,

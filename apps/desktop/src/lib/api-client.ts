@@ -1,4 +1,4 @@
-import type { ApiErrorResponse } from "@launcher/contracts";
+import type { ApiErrorResponse } from "@fuse-launcher/contracts";
 import { defaultHttpFetcher } from "./http-fetcher";
 import { DEFAULT_API_BASE_URL } from "./api-config";
 import { reportRendererError } from "./observability/sentry";
@@ -37,7 +37,7 @@ const FALLBACK_NEXT_ACTION = "try again";
  * only serves `bun dev` / `bun dev:web` on a developer machine.
  */
 /**
- * Typed HTTP client for the launcher API. All HTTP lives here.
+ * Typed HTTP client for the Fuse Launcher API. All HTTP lives here.
  *
  * Joins the base URL (from `VITE_API_URL`, injectable for tests) with the
  * relative path, sends JSON only when a body exists, includes credentials on

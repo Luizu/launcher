@@ -41,7 +41,7 @@ describe("renderer Sentry", () => {
       expect.objectContaining({
         dsn: "https://public@example.ingest.sentry.io/1",
         environment: "production",
-        release: "launcher@0.3.0",
+        release: "fuse-launcher@0.3.0",
         sendDefaultPii: false,
       }),
     );

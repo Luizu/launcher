@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { listen as tauriListen } from "@tauri-apps/api/event";
-import type { LocalLibrarySnapshot } from "@launcher/contracts";
+import type { LocalLibrarySnapshot } from "@fuse-launcher/contracts";
 import { isTauriRuntime } from "../../lib/http-fetcher";
 import { LOCAL_LIBRARY_QUERY_KEY } from "./use-local-library";
 

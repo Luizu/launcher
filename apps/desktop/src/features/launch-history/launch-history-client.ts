@@ -1,4 +1,4 @@
-import type { LaunchHistory } from "@launcher/contracts";
+import type { LaunchHistory } from "@fuse-launcher/contracts";
 import { TauriClient } from "../../lib/tauri-client";
 
 /**

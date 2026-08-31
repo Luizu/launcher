@@ -1,4 +1,4 @@
-import type { GameLibraryConnection } from "@launcher/contracts";
+import type { GameLibraryConnection } from "@fuse-launcher/contracts";
 
 /**
  * A connection is stale — eligible for a focus/periodic sync — when it never

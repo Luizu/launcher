@@ -115,14 +115,14 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
-            // Info for the whole process; Debug for the launcher's own
+            // Info for the whole process; Debug for Fuse Launcher modules
             // modules so operators see scan/status details without
             // third-party crate noise.
             tauri_plugin_log::Builder::default()
                 .targets([
                     Target::new(TargetKind::Stdout),
                     Target::new(TargetKind::LogDir {
-                        file_name: Some("launcher".into()),
+                        file_name: Some("fuse-launcher".into()),
                     }),
                     Target::new(TargetKind::Webview),
                 ])
@@ -131,7 +131,7 @@ pub fn run() {
                 .timezone_strategy(TimezoneStrategy::UseLocal)
                 .max_file_size(5_000_000)
                 .level(log::LevelFilter::Info)
-                .level_for("launcher_desktop_lib", log::LevelFilter::Debug)
+                .level_for("fuse_launcher_desktop_lib", log::LevelFilter::Debug)
                 .build(),
         )
         .setup(|app| {
@@ -144,7 +144,7 @@ pub fn run() {
             // The log plugin is initialized before the setup hook, so the
             // native log pipeline (stdout target) is live from the first
             // message the runtime emits.
-            log::info!("starting launcher desktop runtime");
+            log::info!("starting Fuse Launcher desktop runtime");
             let locator = SteamLibraryLocator::new(WindowsSteamRegistry, ValveKeyValueParser);
             let snapshot = Arc::new(Mutex::new(LocalLibrarySnapshot::new(
                 Vec::new(),
@@ -152,7 +152,7 @@ pub fn run() {
             )));
             // The launch history lives in the app data directory; when the
             // path cannot be resolved the store falls back to in-memory so
-            // the launcher still starts and records for the session.
+            // Fuse Launcher still starts and records for the session.
             let history = match app.path().app_data_dir() {
                 Ok(dir) => {
                     let path = dir.join("launch_history.json");
@@ -168,7 +168,7 @@ pub fn run() {
             };
             // The watcher observes the known Steam sources on its own
             // thread, bounded by the poll interval; the process lifetime
-            // owns the thread (it dies with the launcher). The snapshot is
+            // owns the thread (it dies with Fuse Launcher). The snapshot is
             // shared with the scan command and the action service, so a
             // watcher scan refreshes the exact buffer every reader uses.
             std::thread::spawn({
@@ -276,7 +276,7 @@ mod tests {
     use std::sync::{Arc, Mutex};
 
     #[test]
-    fn reports_the_windows_launcher_runtime() {
+    fn reports_the_windows_fuse_runtime() {
         assert_eq!(runtime_name(), "windows-steam");
     }
 
@@ -456,7 +456,7 @@ mod tests {
         fn with_installed_game(app_id: u32) -> Self {
             static COUNTER: AtomicU64 = AtomicU64::new(0);
             let root = std::env::temp_dir().join(format!(
-                "launcher-command-test-{}-{}",
+                "fuse-launcher-command-test-{}-{}",
                 std::process::id(),
                 COUNTER.fetch_add(1, Ordering::Relaxed)
             ));

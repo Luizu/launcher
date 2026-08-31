@@ -408,7 +408,7 @@ mod tests {
         let _lock = CWD_LOCK.lock().expect("temp-dir lock poisoned");
         let original = std::env::current_dir().expect("test working directory");
         let temp = std::env::temp_dir().join(format!(
-            "launcher-steam-test-{}-{}",
+            "fuse-launcher-steam-test-{}-{}",
             std::process::id(),
             COUNTER.fetch_add(1, Ordering::Relaxed)
         ));

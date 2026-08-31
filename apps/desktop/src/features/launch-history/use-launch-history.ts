@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { LaunchHistoryEntry } from "@launcher/contracts";
+import type { LaunchHistoryEntry } from "@fuse-launcher/contracts";
 import { TauriClient } from "../../lib/tauri-client";
 import { LaunchHistoryClient, type LaunchHistoryClientLike } from "./launch-history-client";
 

@@ -70,7 +70,7 @@ describe("UpdaterProvider", () => {
     render(
       <StrictMode>
         <UpdaterProvider client={client}>
-          <span>launcher</span>
+          <span>Fuse Launcher</span>
         </UpdaterProvider>
       </StrictMode>,
     );

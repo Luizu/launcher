@@ -5,7 +5,7 @@ import type {
   GameLibraryResponse,
   SessionResponse,
   SyncLibraryResult,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import { AuthProvider, type AuthClientLike } from "../../auth/auth-context";
 import { SteamConnectionCard } from "../../platform-connections/steam-connection-card";
 import { useGameLibrary } from "../use-game-library";

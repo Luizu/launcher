@@ -39,7 +39,7 @@ createRoot(rootElement).render(
     fallback={
       <main className="flex min-h-screen items-center justify-center bg-[#090d14] px-6 text-center text-white">
         <section className="max-w-md space-y-4">
-          <h1 className="text-xl font-semibold">O launcher encontrou um problema</h1>
+          <h1 className="text-xl font-semibold">O Fuse Launcher encontrou um problema</h1>
           <p className="text-sm text-white/65">
             Tente recarregar o aplicativo. Se o problema continuar, abra a pasta de logs pelo menu do usuário.
           </p>

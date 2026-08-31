@@ -4,7 +4,7 @@ import { MemoryRouter, useRoutes } from "react-router-dom";
 import type {
   GameLibraryConnection,
   SessionResponse,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import { AuthProvider } from "../features/auth/auth-context";
 import { ApiClient } from "../lib/api-client";
 import { AuthClient } from "../lib/auth-client";

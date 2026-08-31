@@ -1,7 +1,7 @@
 import type {
   LinkAttemptStatus,
   StartPlatformLinkResponse,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import { ApiClient } from "../../lib/api-client";
 
 /**

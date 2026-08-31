@@ -5,7 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import type {
   GameLibraryResponse,
   LocalLibrarySnapshot,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import type { GameLibraryClientLike } from "./game-library-client";
 import { LibraryPage } from "./library-page";
 import type { LocalLibraryClientLike } from "../local-library/local-library-client";

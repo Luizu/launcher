@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import type { EnrichmentStatus } from "@launcher/contracts";
+import type { EnrichmentStatus } from "@fuse-launcher/contracts";
 import { selectSelectorCover, titleInitials } from "../../lib/media-fallback";
 import { providerLabel } from "../../lib/provider-label";
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LibraryGame } from "../../lib/merge-library";
 import { ActionButton } from "../button/action-button";
 import { InstallStatus } from "../status/install-status";
 
 export interface GameCardProps {
-  game: LauncherGame;
+  game: LibraryGame;
   /** Dispatches a launch for an installed game; wired by `useGameActions`. */
-  onLaunch?: (game: LauncherGame) => void | Promise<void>;
+  onLaunch?: (game: LibraryGame) => void | Promise<void>;
   /** Requests installation for a remote not-installed game. */
-  onInstall?: (game: LauncherGame) => void | Promise<void>;
+  onInstall?: (game: LibraryGame) => void | Promise<void>;
   /** Opens Steam's downloads page when the install state cannot be verified. */
-  onCheckSteam?: (game: LauncherGame) => void | Promise<void>;
+  onCheckSteam?: (game: LibraryGame) => void | Promise<void>;
   /**
    * True while the local scan is still pending: the merged install states are
    * not trustworthy yet, so the action area shows a neutral disabled
@@ -59,7 +59,7 @@ export function GameCard({
   const [busy, setBusy] = useState(false);
 
   const runAction =
-    (action?: (game: LauncherGame) => void | Promise<void>) => () => {
+    (action?: (game: LibraryGame) => void | Promise<void>) => () => {
       if (busy || action === undefined) return;
       setBusy(true);
       void Promise.resolve(action(game))
@@ -70,20 +70,20 @@ export function GameCard({
   const action = scanPending ? (
     <ActionButton disabled>Verificando…</ActionButton>
   ) : game.installState === "installed" ? (
-      <ActionButton disabled={busy || !onLaunch} onClick={runAction(onLaunch)}>
-        Jogar
-      </ActionButton>
-    ) : game.installState === "not-installed" ? (
-      <ActionButton disabled={busy || !onInstall} onClick={runAction(onInstall)}>
-        Instalar
-      </ActionButton>
-    ) : (
-      <InstallStatus
-        state={game.installState}
-        disabled={busy}
-        onCheckSteam={runAction(onCheckSteam)}
-      />
-    );
+    <ActionButton disabled={busy || !onLaunch} onClick={runAction(onLaunch)}>
+      Jogar
+    </ActionButton>
+  ) : game.installState === "not-installed" ? (
+    <ActionButton disabled={busy || !onInstall} onClick={runAction(onInstall)}>
+      Instalar
+    </ActionButton>
+  ) : (
+    <InstallStatus
+      state={game.installState}
+      disabled={busy}
+      onCheckSteam={runAction(onCheckSteam)}
+    />
+  );
 
   const identity = game.catalogIdentity ?? null;
   const title = identity?.name ?? game.name;
@@ -93,8 +93,8 @@ export function GameCard({
     : undefined;
 
   return (
-    <article className="flex min-w-0 flex-col gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
-      <div className="aspect-[3/4] w-full overflow-hidden rounded-md bg-zinc-800">
+    <article className="group flex min-w-0 flex-col gap-3 rounded-2xl border border-white/10 bg-[#0b1322]/80 p-3 shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition-colors hover:border-[#8cf5d0]/30">
+      <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#111b2d]">
         {coverUrl !== null ? (
           <img
             src={coverUrl}
@@ -106,7 +106,7 @@ export function GameCard({
         ) : (
           <div
             aria-hidden="true"
-            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900"
+            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#111b2d] to-[#07101b]"
           >
             <span className="text-4xl font-black tracking-tight text-zinc-600">
               {titleInitials(title)}
@@ -132,7 +132,7 @@ export function GameCard({
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex w-fit items-center rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-medium text-zinc-400">
+        <span className="inline-flex w-fit items-center rounded bg-[#111b2d] px-1.5 py-0.5 text-[10px] font-medium text-[#9eabc0]">
           {providerLabel(game.provider)}
         </span>
         {enrichmentLabel !== undefined && (

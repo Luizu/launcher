@@ -55,7 +55,7 @@ export function LibraryControls({
   return (
     <section
       aria-label="Busca e filtros da biblioteca"
-      className="flex flex-wrap items-end gap-4"
+      className="flex flex-wrap items-end gap-4 rounded-2xl border border-white/10 bg-[#0b1322]/65 p-4"
     >
       <div className="w-64 max-w-full">
         <TextField
@@ -71,7 +71,7 @@ export function LibraryControls({
           type="checkbox"
           checked={installedOnly}
           onChange={(event) => onInstalledOnlyChange(event.target.checked)}
-          className="h-4 w-4 rounded border-zinc-600 bg-zinc-900 accent-indigo-500"
+          className="h-4 w-4 rounded border-zinc-600 bg-zinc-900 accent-[#8cf5d0]"
         />
         Somente instalados
       </label>
@@ -86,7 +86,7 @@ export function LibraryControls({
             id={providerSelectId}
             value={provider}
             onChange={(event) => onProviderChange(event.target.value)}
-            className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+          className="rounded-lg border border-white/10 bg-[#111b2d] px-3 py-2 text-sm text-zinc-100 focus:border-[#8cf5d0] focus:outline-none focus:ring-1 focus:ring-[#8cf5d0]"
           >
             <option value="all">Todos</option>
             {providers.map((candidate) => (
@@ -107,7 +107,7 @@ export function LibraryControls({
           id={sortSelectId}
           value={sortKey}
           onChange={(event) => onSortKeyChange(event.target.value as LibrarySortKey)}
-          className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+          className="rounded-lg border border-white/10 bg-[#111b2d] px-3 py-2 text-sm text-zinc-100 focus:border-[#8cf5d0] focus:outline-none focus:ring-1 focus:ring-[#8cf5d0]"
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>

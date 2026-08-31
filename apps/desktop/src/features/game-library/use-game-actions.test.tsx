@@ -1,8 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { LocalLibrarySnapshot } from "@launcher/contracts";
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LocalLibrarySnapshot } from "@fuse-launcher/contracts";
+import type { LibraryGame } from "../../lib/merge-library";
 import { TauriClientError } from "../../lib/tauri-client";
 import { LOCAL_LIBRARY_QUERY_KEY } from "../local-library/use-local-library";
 import { LAUNCH_HISTORY_QUERY_KEY } from "../launch-history/use-launch-history";
@@ -12,14 +12,14 @@ import {
   type UseGameActionsResult,
 } from "./use-game-actions";
 
-const INSTALLED_CS2: LauncherGame = {
+const INSTALLED_CS2: LibraryGame = {
   provider: "steam",
   externalGameId: "730",
   name: "Counter-Strike 2",
   installState: "installed",
 };
 
-const REMOTE_CS2: LauncherGame = {
+const REMOTE_CS2: LibraryGame = {
   provider: "steam",
   externalGameId: "730",
   name: "Counter-Strike 2",
@@ -46,7 +46,7 @@ function GameActionsRow({
   namePrefix = "",
 }: {
   actions: UseGameActionsResult;
-  game: LauncherGame;
+  game: LibraryGame;
   namePrefix?: string;
 }) {
   return (
@@ -72,8 +72,8 @@ function ActionsProbe({
 }: {
   tauri: GameActionsClientLike;
   openUrl?: (url: string) => Promise<void>;
-  game: LauncherGame;
-  secondGame?: LauncherGame;
+  game: LibraryGame;
+  secondGame?: LibraryGame;
 }) {
   const actions = useGameActions({ tauri, openUrl });
   return (
@@ -93,8 +93,8 @@ function ActionsProbe({
 
 interface RenderProbeOptions {
   openUrl?: (url: string) => Promise<void>;
-  game?: LauncherGame;
-  secondGame?: LauncherGame;
+  game?: LibraryGame;
+  secondGame?: LibraryGame;
 }
 
 function renderProbe(
@@ -249,7 +249,7 @@ describe("useGameActions", () => {
     const install = vi.fn().mockResolvedValue({ accepted: true });
     const tauri = tauriClient({ launch, install });
     const user = userEvent.setup();
-    const DOTA2: LauncherGame = {
+    const DOTA2: LibraryGame = {
       provider: "steam",
       externalGameId: "570",
       name: "Dota 2",

@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import type {
   GamePageResponse,
   LocalLibrarySnapshot,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import { ApiClientError } from "../../lib/api-client";
 import type { GameActionsClientLike } from "../game-library/use-game-actions";
 import type { LocalLibraryClientLike } from "../local-library/local-library-client";

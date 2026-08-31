@@ -21,7 +21,7 @@
 //! code path exercises the real Registry. Either way the app surface must
 //! stay usable.
 
-use launcher_desktop_lib::smoke::{
+use fuse_launcher_desktop_lib::smoke::{
     game_actions_get_install_status_inner, game_actions_install_inner, game_actions_launch_inner,
     local_library_scan_inner, ActionAcceptedDto, CommandError, DiscoveryError, GameActionError,
     GameActionService, InstallStatusDto, InstallStatusService, InstallStatusStateDto,
@@ -87,7 +87,7 @@ impl FixtureLibraries {
     fn new() -> Self {
         static COUNTER: AtomicU64 = AtomicU64::new(0);
         let base = std::env::temp_dir().join(format!(
-            "launcher-windows-smoke-{}-{}",
+            "fuse-launcher-windows-smoke-{}-{}",
             std::process::id(),
             COUNTER.fetch_add(1, Ordering::Relaxed)
         ));

@@ -97,7 +97,7 @@ impl LaunchHistoryStore {
     ///
     /// A missing file, an unreadable file, or a file in an unknown format
     /// yields an empty store — a corrupt history must never prevent the
-    /// launcher from starting.
+    /// Fuse Launcher from starting.
     pub fn load(path: PathBuf) -> Self {
         let entries = load_entries(&path);
         Self {
@@ -287,7 +287,7 @@ mod tests {
         fn new() -> Self {
             static COUNTER: AtomicU64 = AtomicU64::new(0);
             let dir = std::env::temp_dir().join(format!(
-                "launcher-history-test-{}-{}",
+                "fuse-launcher-history-test-{}-{}",
                 std::process::id(),
                 COUNTER.fetch_add(1, Ordering::Relaxed)
             ));
@@ -345,7 +345,7 @@ mod tests {
                 .unwrap();
         }
         // A fresh store instance over the same file must recover both
-        // entries: the history survives a launcher restart.
+        // entries: the history survives a Fuse Launcher restart.
         let store = LaunchHistoryStore::load(fixture.path.clone());
         assert_eq!(
             store.entries(),

@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import type { SessionResponse } from "@launcher/contracts";
+import type { SessionResponse } from "@fuse-launcher/contracts";
 import { mockMatchMedia, restoreMatchMedia } from "../../test/match-media";
 import { AuthProvider, type AuthClientLike } from "../auth/auth-context";
 import { diagnosticsClient } from "../diagnostics/diagnostics-client";
@@ -59,6 +59,8 @@ it("keeps the sidebar with only Home and Biblioteca as destinations", async () =
   renderShell("/home");
 
   await screen.findByText("conteudo-home");
+  expect(within(screen.getByRole("complementary", { name: "Menu principal" })).getByText("Fuse")).toBeInTheDocument();
+  expect(within(screen.getByRole("complementary", { name: "Menu principal" })).getByText("Launcher")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Biblioteca" })).toBeInTheDocument();
   expect(
@@ -138,9 +140,20 @@ it("reserves search, user and settings in the topbar without a sync indicator", 
     within(topbar).getByRole("searchbox", { name: "Buscar" }),
   ).toBeDisabled();
   expect(await within(topbar).findByText("LU")).toBeInTheDocument();
+  expect(within(topbar).getByText("Luizu")).toBeInTheDocument();
+  expect(within(topbar).getByRole("button", { name: "Usuário" }).className).toMatch(
+    /min-w-/,
+  );
   expect(
     within(topbar).getByRole("button", { name: "Configurações" }),
   ).toBeDisabled();
+
+  expect(
+    within(screen.getByRole("complementary", { name: "Menu principal" })).queryByRole(
+      "button",
+      { name: "Usuário" },
+    ),
+  ).not.toBeInTheDocument();
 
   // No permanent sync status in the topbar.
   expect(within(topbar).queryByText(/sincroniz/i)).not.toBeInTheDocument();
@@ -183,8 +196,8 @@ describe("AppShell compact window", () => {
 
     await screen.findByText("conteudo-home");
     const sidebar = screen.getByRole("complementary", { name: "Menu principal" });
-    expect(sidebar).toHaveClass("w-[60px]");
-    expect(sidebar).not.toHaveClass("w-[78px]");
+    expect(sidebar).toHaveClass("w-[64px]");
+    expect(sidebar).not.toHaveClass("w-[224px]");
 
     const topbar = screen.getByRole("banner");
     expect(topbar).toHaveClass("h-[58px]");
@@ -208,7 +221,7 @@ describe("AppShell compact window", () => {
     await screen.findByText("conteudo-home");
     expect(
       screen.getByRole("complementary", { name: "Menu principal" }),
-    ).toHaveClass("w-[78px]");
+    ).toHaveClass("w-[224px]");
     expect(screen.getByRole("banner")).toHaveClass("h-[72px]");
     expect(
       within(screen.getByRole("banner")).getByRole("searchbox", { name: "Buscar" }),

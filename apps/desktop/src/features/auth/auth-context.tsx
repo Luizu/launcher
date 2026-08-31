@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { SessionResponse, SignInInput, SignUpInput } from "@launcher/contracts";
+import type { SessionResponse, SignInInput, SignUpInput } from "@fuse-launcher/contracts";
 
 /**
  * The slice of {@link AuthClient} the session state needs. Injected so tests

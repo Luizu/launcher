@@ -1,6 +1,6 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { LocalLibrarySnapshot } from "@launcher/contracts";
+import type { LocalLibrarySnapshot } from "@fuse-launcher/contracts";
 import { useLocalLibrary, type UseLocalLibraryOptions } from "./use-local-library";
 
 const EMPTY_SNAPSHOT: LocalLibrarySnapshot = { games: [], diagnostics: [] };

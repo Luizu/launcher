@@ -1,7 +1,7 @@
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LibraryGame } from "../../lib/merge-library";
 import { gameKey, selectFeaturedGame } from "./select-featured-game";
 
-const CS2: LauncherGame = {
+const CS2: LibraryGame = {
   provider: "steam",
   externalGameId: "730",
   name: "Counter-Strike 2",
@@ -9,7 +9,7 @@ const CS2: LauncherGame = {
   lastActivityAt: "2026-08-28T10:00:00.000Z",
 };
 
-const DOTA: LauncherGame = {
+const DOTA: LibraryGame = {
   provider: "steam",
   externalGameId: "570",
   name: "Dota 2",
@@ -17,7 +17,7 @@ const DOTA: LauncherGame = {
   lastActivityAt: "2026-08-28T09:00:00.000Z",
 };
 
-const GARRY: LauncherGame = {
+const GARRY: LibraryGame = {
   provider: "steam",
   externalGameId: "4000",
   name: "Garry's Mod",
@@ -25,14 +25,14 @@ const GARRY: LauncherGame = {
   lastActivityAt: null,
 };
 
-const PORTAL: LauncherGame = {
+const PORTAL: LibraryGame = {
   provider: "steam",
   externalGameId: "400",
   name: "Portal",
   installState: "installed",
 };
 
-const HALF_LIFE: LauncherGame = {
+const HALF_LIFE: LibraryGame = {
   provider: "steam",
   externalGameId: "70",
   name: "Half-Life",
@@ -84,13 +84,13 @@ describe("selectFeaturedGame", () => {
   });
 
   it("breaks activity ties deterministically by name, then provider", () => {
-    const twinA: LauncherGame = {
+    const twinA: LibraryGame = {
       ...DOTA,
       provider: "epic",
       externalGameId: "1",
       lastActivityAt: "2026-08-28T09:00:00.000Z",
     };
-    const twinB: LauncherGame = {
+    const twinB: LibraryGame = {
       ...DOTA,
       externalGameId: "570",
       lastActivityAt: "2026-08-28T09:00:00.000Z",

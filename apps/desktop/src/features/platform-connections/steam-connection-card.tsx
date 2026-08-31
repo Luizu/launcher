@@ -4,7 +4,7 @@ import type {
   LinkAttemptStatus,
   StartPlatformLinkResponse,
   SyncLibraryResult,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import { ActionButton } from "../../components/button/action-button";
 import { InlineStatus } from "../../components/status/inline-status";
 
@@ -233,7 +233,7 @@ export function SteamConnectionCard({
     return (
       <section
         role="status"
-        className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6"
+        className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl"
       >
         <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
         <p className="mt-1 text-sm text-zinc-300">Aguardando confirmação da Steam</p>
@@ -255,7 +255,7 @@ export function SteamConnectionCard({
     const message =
       phase === "error" ? START_FAILED : CONFIRMATION_FAILED;
     return (
-      <section className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6">
+      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl">
         <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
         <InlineStatus tone="error" onRetry={() => void handleStart()}>
           {message}
@@ -269,7 +269,7 @@ export function SteamConnectionCard({
       // A completed link whose library refetch failed must not dead-end on
       // "Carregando a biblioteca…"; offer a refresh/retry instead.
       return (
-        <section className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6">
+        <section className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl">
           <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
           <InlineStatus tone="error" onRetry={onRefreshLibrary}>
             {LIBRARY_UNAVAILABLE}
@@ -284,7 +284,7 @@ export function SteamConnectionCard({
       return (
         <section
           role="status"
-          className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6"
+          className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl"
         >
           <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
           <p className="mt-1 text-sm text-zinc-300">
@@ -295,7 +295,7 @@ export function SteamConnectionCard({
     }
 
     return (
-      <section className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6">
+      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl">
         <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
         <p className="mt-1 text-sm text-zinc-300">Steam não conectada</p>
         <div className="mt-4">
@@ -309,7 +309,7 @@ export function SteamConnectionCard({
 
   if (syncFailed) {
     return (
-      <section className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6">
+      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl">
         <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
         <InlineStatus tone="error" onRetry={() => void handleSync()}>
           {SYNC_FAILED}
@@ -320,7 +320,7 @@ export function SteamConnectionCard({
 
   if (view.kind === "private") {
     return (
-      <section className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6">
+      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl">
         <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
         <p className="mt-1 text-sm text-zinc-300">
           Conta conectada; biblioteca indisponível
@@ -339,7 +339,7 @@ export function SteamConnectionCard({
     // stale, so show the last-sync time next to the failure instead of
     // presenting the list as current.
     return (
-      <section className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6">
+      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl">
         <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
         <p className="mt-1 text-sm text-zinc-300">{LIBRARY_STALE}</p>
         {lastSyncedLabel !== null && (
@@ -356,7 +356,7 @@ export function SteamConnectionCard({
 
   if (view.kind === "unavailable") {
     return (
-      <section className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6">
+      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl">
         <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
         <p className="mt-1 text-sm text-zinc-300">
           Sua biblioteca Steam está indisponível.
@@ -372,7 +372,7 @@ export function SteamConnectionCard({
     return (
       <section
         role="status"
-        className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6"
+        className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl"
       >
         <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
         <p className="mt-1 text-sm text-zinc-300">Sincronizando biblioteca…</p>
@@ -385,7 +385,7 @@ export function SteamConnectionCard({
 
   if (view.kind === "synced") {
     return (
-      <section className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6">
+      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl">
         <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
         <p className="mt-1 text-sm text-zinc-300">Sincronizada</p>
         {lastSyncedLabel !== null && (
@@ -403,7 +403,7 @@ export function SteamConnectionCard({
   }
 
   return (
-    <section className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900/60 p-6">
+    <section className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1322]/80 p-6 shadow-2xl">
       <h2 className="text-lg font-semibold tracking-tight">Steam</h2>
       <p className="mt-1 text-sm text-zinc-300">Conectada, nunca sincronizada</p>
       <div className="mt-4">

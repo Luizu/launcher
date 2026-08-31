@@ -1,4 +1,4 @@
-# Windows acceptance checklist — Launcher MVP
+# Windows acceptance checklist — Fuse Launcher MVP
 
 > Executable by a tester without reading internal modules. Run on a Windows
 > machine with Steam installed. The API must be running locally with PostgreSQL
@@ -18,10 +18,10 @@
 3. Return to the app and wait for the library sync.
 4. Confirm a public profile shows remote games without local paths.
 5. Refresh the local scan and confirm installed Steam games are marked installed.
-6. Click **Jogar** and confirm Steam launches the selected AppID.
+6. Click **Jogar** and confirm Steam launches the selected AppID from Fuse Launcher.
 7. Choose a remote not-installed game and click **Instalar**.
 8. Confirm the UI shows **Instalando…** and the Steam Downloads page is available.
-9. Complete or cancel the download in Steam and confirm the launcher reaches
+9. Complete or cancel the download in Steam and confirm Fuse Launcher reaches
    `installed` or `unknown` with a recovery action (**Verificar na Steam**).
 10. Repeat with a private profile and confirm the privacy state is clear
     (*Conta conectada; biblioteca indisponível*).

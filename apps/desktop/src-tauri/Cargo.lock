@@ -1275,6 +1275,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "fuse-launcher-desktop"
+version = "0.2.1"
+dependencies = [
+ "log",
+ "rmp",
+ "sentry",
+ "sentry-contrib-native",
+ "sentry-contrib-native-sys",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-http",
+ "tauri-plugin-log",
+ "tauri-plugin-opener",
+ "tauri-plugin-process",
+ "tauri-plugin-updater",
+ "tempfile",
+ "winreg 0.56.0",
+]
+
+[[package]]
 name = "futures-channel"
 version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2259,28 +2281,6 @@ dependencies = [
  "bitflags 2.13.1",
  "serde",
  "unicode-segmentation",
-]
-
-[[package]]
-name = "launcher-desktop"
-version = "0.2.1"
-dependencies = [
- "log",
- "rmp",
- "sentry",
- "sentry-contrib-native",
- "sentry-contrib-native-sys",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-http",
- "tauri-plugin-log",
- "tauri-plugin-opener",
- "tauri-plugin-process",
- "tauri-plugin-updater",
- "tempfile",
- "winreg 0.56.0",
 ]
 
 [[package]]

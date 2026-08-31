@@ -4,7 +4,7 @@ import type {
   InstallStatus,
   LaunchHistory,
   LocalLibrarySnapshot,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import { reportRendererError } from "./observability/sentry";
 
 /**

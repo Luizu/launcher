@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { SignInInput, SignUpInput } from "@launcher/contracts";
+import type { SignInInput, SignUpInput } from "@fuse-launcher/contracts";
 import { ActionButton } from "../../components/button/action-button";
 import { TextField } from "../../components/input/text-field";
 import { InlineStatus } from "../../components/status/inline-status";

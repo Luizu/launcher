@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import type {
   GameLibraryConnection,
   GameLibraryResponse,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import type { GameLibraryClientLike } from "../game-library/game-library-client";
 import { GAME_LIBRARY_QUERY_KEY } from "../platform-connections/use-steam-connection";
 import {

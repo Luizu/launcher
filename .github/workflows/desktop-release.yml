@@ -3,7 +3,7 @@ name: Desktop CI
 on:
   push:
     branches: [main]
-    tags: ["launcher-v*"]
+    tags: ["fuse-launcher-v*", "launcher-v*"]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -78,7 +78,7 @@ jobs:
 
   validate-sentry:
     name: Validate Sentry CI credentials
-    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/launcher-v')) || (github.event_name == 'workflow_dispatch' && inputs.repair_release_tag != '') }}
+    if: ${{ (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/fuse-launcher-v') || startsWith(github.ref, 'refs/tags/launcher-v'))) || (github.event_name == 'workflow_dispatch' && inputs.repair_release_tag != '') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -115,7 +115,7 @@ jobs:
   build-windows-installer:
     name: Build Windows installer (NSIS + MSI)
     needs: [validate-sentry]
-    if: ${{ always() && ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/launcher-v')) || (github.event_name == 'workflow_dispatch' && inputs.repair_release_tag != '') || (github.event_name == 'workflow_dispatch' && inputs.self_signed)) && (needs.validate-sentry.result == 'success' || needs.validate-sentry.result == 'skipped') }}
+    if: ${{ always() && ((github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/fuse-launcher-v') || startsWith(github.ref, 'refs/tags/launcher-v'))) || (github.event_name == 'workflow_dispatch' && inputs.repair_release_tag != '') || (github.event_name == 'workflow_dispatch' && inputs.self_signed)) && (needs.validate-sentry.result == 'success' || needs.validate-sentry.result == 'skipped') }}
     runs-on: windows-latest
     permissions:
       contents: write
@@ -123,8 +123,8 @@ jobs:
       VITE_API_URL: https://launcher-api-production-e506.up.railway.app
       VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
       SENTRY_NATIVE_DSN: ${{ vars.SENTRY_NATIVE_DSN }}
-      SENTRY_REQUIRED: ${{ ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/launcher-v')) || (github.event_name == 'workflow_dispatch' && inputs.repair_release_tag != '')) && 'true' || 'false' }}
-      RELEASE_MODE: ${{ ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/launcher-v')) || (github.event_name == 'workflow_dispatch' && inputs.repair_release_tag != '')) && 'true' || 'false' }}
+      SENTRY_REQUIRED: ${{ ((github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/fuse-launcher-v') || startsWith(github.ref, 'refs/tags/launcher-v'))) || (github.event_name == 'workflow_dispatch' && inputs.repair_release_tag != '')) && 'true' || 'false' }}
+      RELEASE_MODE: ${{ ((github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/fuse-launcher-v') || startsWith(github.ref, 'refs/tags/launcher-v'))) || (github.event_name == 'workflow_dispatch' && inputs.repair_release_tag != '')) && 'true' || 'false' }}
       RELEASE_TAG: ${{ (github.event_name == 'push' && github.ref_name) || inputs.repair_release_tag }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       SENTRY_ORG: ${{ vars.SENTRY_ORG }}
@@ -162,8 +162,8 @@ jobs:
         shell: pwsh
         run: |
           $isRelease = $env:RELEASE_MODE -eq "true"
-          if ($isRelease -and $env:RELEASE_TAG -notmatch '^launcher-v\d+\.\d+\.\d+$') {
-            throw "RELEASE_TAG must match launcher-vX.Y.Z"
+          if ($isRelease -and $env:RELEASE_TAG -notmatch '^(fuse-launcher|launcher)-v\d+\.\d+\.\d+$') {
+            throw "RELEASE_TAG must match fuse-launcher-vX.Y.Z (legacy launcher-vX.Y.Z is accepted)"
           }
           if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
             throw "TAURI_SIGNING_PRIVATE_KEY is required to build updater artifacts"
@@ -192,19 +192,19 @@ jobs:
         shell: pwsh
         working-directory: apps/desktop
         run: |
-          $signingDirectory = Join-Path $env:RUNNER_TEMP "launcher-dev-signing"
+          $signingDirectory = Join-Path $env:RUNNER_TEMP "fuse-launcher-dev-signing"
           New-Item -ItemType Directory -Path $signingDirectory -Force | Out-Null
           $certificate = New-SelfSignedCertificate `
             -Type CodeSigningCert `
-            -Subject "CN=Launcher Development (self-signed)" `
-            -FriendlyName "Launcher Development (self-signed)" `
+            -Subject "CN=Fuse Launcher Development (self-signed)" `
+            -FriendlyName "Fuse Launcher Development (self-signed)" `
             -KeyAlgorithm RSA `
             -KeyLength 3072 `
             -HashAlgorithm SHA256 `
             -KeyExportPolicy Exportable `
             -CertStoreLocation "Cert:\CurrentUser\My" `
             -NotAfter (Get-Date).AddYears(5)
-          $certificatePath = Join-Path $signingDirectory "launcher-dev.cer"
+          $certificatePath = Join-Path $signingDirectory "fuse-launcher-dev.cer"
           Export-Certificate -Cert $certificate -FilePath $certificatePath | Out-Null
           Import-Certificate -FilePath $certificatePath -CertStoreLocation "Cert:\CurrentUser\TrustedPublisher" | Out-Null
           $overlayPath = "src-tauri/tauri.windows.conf.json"
@@ -214,8 +214,8 @@ jobs:
           $overlay.bundle.windows | Add-Member -MemberType NoteProperty -Name certificateThumbprint -Value $certificate.Thumbprint -Force
           $overlay.bundle.windows | Add-Member -MemberType NoteProperty -Name digestAlgorithm -Value "sha256" -Force
           $overlay | ConvertTo-Json -Depth 10 | Set-Content -Path $overlayPath -Encoding utf8
-          "LAUNCHER_DEV_CERTIFICATE_PATH=$certificatePath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          "LAUNCHER_DEV_CERTIFICATE_THUMBPRINT=$($certificate.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "FUSE_DEV_CERTIFICATE_PATH=$certificatePath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "FUSE_DEV_CERTIFICATE_THUMBPRINT=$($certificate.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -319,13 +319,13 @@ jobs:
           foreach ($installer in $installers) {
             $signature = Get-AuthenticodeSignature -FilePath $installer.FullName
             if ($null -eq $signature.SignerCertificate) { throw "Installer is not Authenticode-signed: $($installer.FullName)" }
-            if ($signature.SignerCertificate.Thumbprint -ne $env:LAUNCHER_DEV_CERTIFICATE_THUMBPRINT) { throw "Installer was signed by an unexpected certificate: $($installer.FullName)" }
+            if ($signature.SignerCertificate.Thumbprint -ne $env:FUSE_DEV_CERTIFICATE_THUMBPRINT) { throw "Installer was signed by an unexpected certificate: $($installer.FullName)" }
           }
 
       - name: Upload installer artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: launcher-windows-installer
+          name: fuse-launcher-windows-installer
           path: |
             apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
             apps/desktop/src-tauri/target/release/bundle/nsis/*.zip
@@ -339,8 +339,8 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.self_signed }}
         uses: actions/upload-artifact@v4
         with:
-          name: launcher-windows-self-signed-certificate
-          path: ${{ runner.temp }}/launcher-dev-signing/launcher-dev.cer
+          name: fuse-launcher-windows-self-signed-certificate
+          path: ${{ runner.temp }}/fuse-launcher-dev-signing/fuse-launcher-dev.cer
           if-no-files-found: error
           retention-days: 14
 
@@ -380,7 +380,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $expectedVersion = (Get-Content -Raw -Path package.json | ConvertFrom-Json).version
-          $manifestDirectory = Join-Path $env:RUNNER_TEMP "launcher-release-manifest"
+          $manifestDirectory = Join-Path $env:RUNNER_TEMP "fuse-launcher-release-manifest"
           New-Item -ItemType Directory -Path $manifestDirectory -Force | Out-Null
           gh release download $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --pattern "latest.json" --dir $manifestDirectory --clobber
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

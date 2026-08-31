@@ -40,7 +40,7 @@ export function LibraryState({
         {Array.from({ length: SKELETON_ROWS }, (_, index) => (
           <div
             key={index}
-            className="h-16 animate-pulse rounded-lg border border-zinc-800 bg-zinc-900/60"
+            className="h-16 animate-pulse rounded-xl border border-white/10 bg-[#0b1322]/80"
           />
         ))}
       </div>
@@ -55,7 +55,7 @@ export function LibraryState({
         </InlineStatus>
       ))}
       {empty && (
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-900/60 p-8 text-center">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-[#0b1322]/80 p-8 text-center">
           <p className="text-sm text-zinc-300">Nenhum jogo encontrado</p>
           {onRefresh && (
             <ActionButton variant="secondary" onClick={onRefresh}>

@@ -9,7 +9,7 @@ import type {
   GameLibraryResponse,
   LocalGame,
   LocalLibrarySnapshot,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import { GAME_LIBRARY_QUERY_KEY } from "../platform-connections/use-steam-connection";
 import { LOCAL_LIBRARY_QUERY_KEY } from "../local-library/use-local-library";
 import type { GameLibraryClientLike } from "../game-library/game-library-client";

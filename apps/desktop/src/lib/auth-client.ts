@@ -1,4 +1,4 @@
-import type { SessionResponse, SignInInput, SignUpInput } from "@launcher/contracts";
+import type { SessionResponse, SignInInput, SignUpInput } from "@fuse-launcher/contracts";
 import { ApiClient } from "./api-client";
 
 /**

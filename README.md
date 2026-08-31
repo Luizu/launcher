@@ -1,9 +1,14 @@
-# Launcher Desktop
+# Fuse Launcher Desktop
 
 Public source and release pipeline for the Windows desktop application. The
 private monorepo contains the API and the complete development environment; this
 repository intentionally contains only the desktop runtime and shared wire
 contracts needed to build it.
+
+The public desktop product is **Fuse Launcher** (short name: **Fuse**) and uses
+the proprietary **CUT** identity. The canonical release tag family is
+`fuse-launcher-vX.Y.Z`; the workflow accepts legacy `launcher-vX.Y.Z` tags during
+the migration.
 
 ## Development
 

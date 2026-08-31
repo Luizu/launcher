@@ -6,9 +6,9 @@ export interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElemen
 
 const VARIANT_CLASSES: Record<NonNullable<ActionButtonProps["variant"]>, string> = {
   primary:
-    "bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:ring-indigo-400 disabled:bg-zinc-800 disabled:text-zinc-500",
+    "bg-[#8cf5d0] text-[#07101b] hover:bg-[#a5f8db] focus-visible:ring-[#8cf5d0] disabled:bg-[#111b2d] disabled:text-[#65748d]",
   secondary:
-    "border border-zinc-700 bg-transparent text-zinc-200 hover:bg-zinc-800 focus-visible:ring-zinc-400 disabled:text-zinc-500",
+    "border border-white/15 bg-white/[0.03] text-[#f2f6ff] hover:bg-white/[0.08] focus-visible:ring-[#8cf5d0] disabled:text-[#65748d]",
 };
 
 /**

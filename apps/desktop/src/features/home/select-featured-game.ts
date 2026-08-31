@@ -1,4 +1,4 @@
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LibraryGame } from "../../lib/merge-library";
 
 /**
  * Join key shared by the history and pinned seams, matching the merged
@@ -7,7 +7,7 @@ import type { LauncherGame } from "../../lib/merge-library";
  * by this key.
  */
 export function gameKey(
-  game: Pick<LauncherGame, "provider" | "externalGameId">,
+  game: Pick<LibraryGame, "provider" | "externalGameId">,
 ): string {
   return `${game.provider}:${game.externalGameId}`;
 }
@@ -28,7 +28,7 @@ export interface SelectFeaturedGameOptions {
 }
 
 /** Deterministic ordering: name, then provider, then id. */
-function byNameThenProvider(a: LauncherGame, b: LauncherGame): number {
+function byNameThenProvider(a: LibraryGame, b: LibraryGame): number {
   if (a.name !== b.name) return a.name < b.name ? -1 : 1;
   if (a.provider !== b.provider) return a.provider < b.provider ? -1 : 1;
   return a.externalGameId < b.externalGameId ? -1 : 1;
@@ -36,9 +36,9 @@ function byNameThenProvider(a: LauncherGame, b: LauncherGame): number {
 
 /** Sorts newest first; ties resolve deterministically by name+provider. */
 function byDateThenName(
-  dateOf: (game: LauncherGame) => string,
-  a: LauncherGame,
-  b: LauncherGame,
+  dateOf: (game: LibraryGame) => string,
+  a: LibraryGame,
+  b: LibraryGame,
 ): number {
   const aDate = dateOf(a);
   const bDate = dateOf(b);
@@ -62,11 +62,11 @@ function byDateThenName(
  * games in the floating selector.
  */
 export function rankHomeGames(
-  games: ReadonlyArray<LauncherGame>,
+  games: ReadonlyArray<LibraryGame>,
   { history = {}, pinned = [] }: SelectFeaturedGameOptions = {},
-): ReadonlyArray<LauncherGame> {
-  const ranked = new Map<string, LauncherGame>();
-  const push = (game: LauncherGame) => {
+): ReadonlyArray<LibraryGame> {
+  const ranked = new Map<string, LibraryGame>();
+  const push = (game: LibraryGame) => {
     const key = gameKey(game);
     if (!ranked.has(key)) ranked.set(key, game);
   };
@@ -123,9 +123,9 @@ export function rankHomeGames(
  * has {@link rankHomeGames} to fall back on for the selector.
  */
 export function selectFeaturedGame(
-  games: ReadonlyArray<LauncherGame>,
+  games: ReadonlyArray<LibraryGame>,
   { history = {}, pinned = [] }: SelectFeaturedGameOptions = {},
-): LauncherGame | null {
+): LibraryGame | null {
   if (games.length === 0) return null;
 
   const withActivity = games.filter(

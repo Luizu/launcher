@@ -29,7 +29,7 @@ export function initializeRendererSentry(
   Sentry.init({
     dsn,
     environment: isProduction ? "production" : "development",
-    release: `launcher@${version}`,
+    release: `fuse-launcher@${version}`,
     sendDefaultPii: false,
     // The app-level listeners below attach a small, sanitized context. Keep
     // the SDK's global handlers disabled so one browser failure is not sent

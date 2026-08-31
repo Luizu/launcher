@@ -10,10 +10,18 @@ import { APP_VERSION, formatAppVersion } from "../../lib/app-version";
 import { DiagnosticsPanel } from "../diagnostics/diagnostics-panel";
 import { UpdateBanner } from "../updater/update-banner";
 import { UpdaterContext } from "../updater/updater-context";
+import { FuseLogo } from "../../components/brand/fuse-logo";
+import {
+  HomeIcon,
+  LibraryIcon,
+  SettingsIcon,
+  SearchIcon,
+  ChevronDownIcon,
+} from "../../components/icons/app-icon";
 
 /**
  * The hybrid shell frame around all authenticated destinations: a compact
- * sidebar rail (brand, Home, Biblioteca, settings placeholder) plus a topbar
+ * sidebar (brand, Home, Biblioteca, settings placeholder) plus a topbar
  * with the current destination context and the reserved global controls
  * (busca, usuário, configurações). No permanent sync status lives here.
  * Below the compact breakpoint (~800px) the rail and the topbar shrink and
@@ -22,8 +30,8 @@ import { UpdaterContext } from "../updater/updater-context";
  */
 
 const SIDEBAR_NAV_ITEMS = [
-  { to: "/home", label: "Home", icon: "⌂" },
-  { to: "/library", label: "Biblioteca", icon: "▦" },
+  { to: "/home", label: "Home", Icon: HomeIcon },
+  { to: "/library", label: "Biblioteca", Icon: LibraryIcon },
 ] as const;
 
 const DESTINATION_LABELS: Record<string, string> = {
@@ -33,7 +41,7 @@ const DESTINATION_LABELS: Record<string, string> = {
 };
 
 function destinationLabel(pathname: string): string {
-  return DESTINATION_LABELS[pathname] ?? "Launcher";
+  return DESTINATION_LABELS[pathname] ?? "Fuse";
 }
 
 function initialsFromName(name: string | null | undefined): string {
@@ -56,37 +64,38 @@ export function ShellSidebar() {
   return (
     <aside
       aria-label="Menu principal"
-      className={`flex shrink-0 flex-col items-center border-r border-[rgba(177,207,241,0.16)] bg-[#050914] ${
-        compact ? "w-[60px] gap-5 py-5" : "w-[78px] gap-8 py-6"
+      className={`flex shrink-0 flex-col border-r border-[rgba(177,207,241,0.16)] bg-[#050914] ${
+        compact ? "w-[64px] items-center gap-5 px-2 py-5" : "w-[224px] gap-8 px-4 py-6"
       }`}
     >
-      <span
-        aria-hidden="true"
-        className={`font-black text-[#8cf5d0] ${compact ? "text-base" : "text-xl"}`}
+      <FuseLogo compact={compact} className={compact ? "justify-center" : "w-full"} />
+      <nav
+        aria-label="Destinos"
+        className={`flex flex-col gap-2 ${compact ? "items-center" : "w-full"}`}
       >
-        ✦
-      </span>
-      <nav aria-label="Destinos" className="flex flex-col items-center gap-3">
-        {SIDEBAR_NAV_ITEMS.map(({ to, label, icon }) => (
+        {SIDEBAR_NAV_ITEMS.map(({ to, label, Icon }) => (
           <NavLink
             key={to}
             to={to}
             aria-label={label}
             className={({ isActive }) =>
-              `grid place-items-center rounded-xl transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8cf5d0] ${
-                compact ? "h-[34px] w-[34px] text-base" : "h-10 w-10 text-lg"
+              `flex items-center rounded-xl transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8cf5d0] ${
+                compact
+                  ? "h-10 w-10 justify-center"
+                  : "h-11 w-full gap-3 px-3"
               } ${
                 isActive
                   ? "bg-[#8cf5d0] text-[#0d1622]"
-                  : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200"
+                  : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100"
               }`
             }
           >
-            <span aria-hidden="true">{icon}</span>
+            <Icon className="h-[18px] w-[18px] shrink-0" />
+            {!compact && <span className="text-sm font-semibold">{label}</span>}
           </NavLink>
         ))}
       </nav>
-      <div className="mt-auto">
+      <div className={`mt-auto ${compact ? "flex flex-col items-center" : "w-full"}`}>
         <span
           aria-label={`Versão da aplicação: ${displayVersion}`}
           title={`Versão da aplicação: ${displayVersion}`}
@@ -100,11 +109,12 @@ export function ShellSidebar() {
           type="button"
           disabled
           aria-label="Configurações"
-          className={`grid place-items-center rounded-xl text-zinc-600 ${
-            compact ? "h-[34px] w-[34px] text-base" : "h-10 w-10 text-lg"
+          className={`flex items-center rounded-xl text-zinc-600 ${
+            compact ? "h-10 w-10 justify-center" : "h-11 w-full gap-3 px-3"
           }`}
         >
-          <span aria-hidden="true">⚙</span>
+          <SettingsIcon className="h-[18px] w-[18px] shrink-0" />
+          {!compact && <span className="text-sm font-semibold">Configurações</span>}
         </button>
       </div>
     </aside>
@@ -117,38 +127,41 @@ export function ShellTopbar() {
 
   return (
     <header
-      className={`flex shrink-0 items-center gap-6 border-b border-[rgba(177,207,241,0.15)] bg-[rgba(4,9,18,0.35)] ${
+      className={`absolute inset-x-0 top-0 z-20 flex items-center gap-6 border-b border-[rgba(177,207,241,0.15)] bg-[linear-gradient(180deg,rgba(5,9,20,0.84),rgba(5,9,20,0))] ${
         compact ? "h-[58px] px-5" : "h-[72px] px-6"
       }`}
     >
-      <p className="text-sm font-bold tracking-tight text-white">
+      <p className="text-sm font-bold tracking-tight text-white/90">
         {destinationLabel(location.pathname)}
       </p>
-      <div className="ml-auto flex items-center gap-4">
+      <div className="ml-auto flex min-w-0 items-center gap-3">
         {!compact && (
-          <input
-            type="search"
-            disabled
-            placeholder="Buscar"
-            aria-label="Buscar"
-            className="h-9 w-52 cursor-not-allowed rounded-lg border border-zinc-700/60 bg-black/20 px-3 text-sm text-zinc-400 placeholder:text-zinc-500"
-          />
+          <div className="relative w-52">
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+            <input
+              type="search"
+              disabled
+              placeholder="Buscar jogos"
+              aria-label="Buscar"
+              className="h-10 w-full cursor-not-allowed rounded-lg border border-white/10 bg-black/20 pl-9 pr-3 text-sm text-zinc-400 placeholder:text-zinc-500"
+            />
+          </div>
         )}
-        <UserMenu />
+        <UserMenu compact={compact} />
         <button
           type="button"
           disabled
           aria-label="Configurações"
-          className="grid h-9 w-9 cursor-not-allowed place-items-center rounded-lg text-lg text-zinc-500"
+          className="grid h-10 w-10 shrink-0 cursor-not-allowed place-items-center rounded-lg text-zinc-500"
         >
-          <span aria-hidden="true">⚙</span>
+          <SettingsIcon className="h-[18px] w-[18px]" />
         </button>
       </div>
     </header>
   );
 }
 
-function UserMenu() {
+function UserMenu({ compact }: { compact: boolean }) {
   const { session, signOut, isSigningOut } = useSession();
   const [open, setOpen] = useState(false);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
@@ -156,6 +169,7 @@ function UserMenu() {
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const updater = useContext(UpdaterContext);
   const updaterStatus = updater?.snapshot.status ?? "disabled";
+  const displayName = session?.user.name?.trim() || session?.user.email || "Usuário";
 
   async function handleOpenLogs() {
     setDiagnosticsError(null);
@@ -186,9 +200,22 @@ function UserMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
-        className="grid h-9 w-9 place-items-center rounded-full border border-[#8799b7] bg-white/10 text-xs font-bold text-zinc-100 transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8cf5d0]"
+        title={displayName}
+        className={`flex shrink-0 items-center rounded-full border border-[#8799b7] bg-white/10 text-xs font-bold text-zinc-100 transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8cf5d0] ${
+          compact
+            ? "h-10 w-10 justify-center"
+            : "h-10 min-w-[180px] max-w-[300px] gap-2 px-1.5 pr-3"
+        }`}
       >
-        {initialsFromName(session?.user.name)}
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#8cf5d0] text-[10px] font-black text-[#0d1622]">
+          {initialsFromName(displayName)}
+        </span>
+        {!compact && (
+          <span className="min-w-0 flex-1 truncate text-left text-xs font-bold text-zinc-100">
+            {displayName}
+          </span>
+        )}
+        {!compact && <ChevronDownIcon className="h-4 w-4 shrink-0 text-zinc-500" />}
       </button>
       {open && (
         <div
@@ -284,10 +311,14 @@ export function AppShell() {
   return (
     <div className="flex h-full overflow-hidden bg-[#050914]">
       <ShellSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <ShellTopbar />
-        <ShellUpdateBanner />
-        <Outlet />
+        <div className="pointer-events-none absolute inset-x-4 top-[80px] z-30 [&_*]:pointer-events-auto max-[800px]:top-[66px]">
+          <ShellUpdateBanner />
+        </div>
+        <div className="relative min-h-0 flex-1 overflow-hidden">
+          <Outlet />
+        </div>
       </div>
     </div>
   );

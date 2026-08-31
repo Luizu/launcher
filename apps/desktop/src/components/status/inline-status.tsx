@@ -25,10 +25,10 @@ export const InlineStatus = forwardRef<HTMLDivElement, InlineStatusProps>(
         ref={ref}
         role={isError ? "alert" : "status"}
         tabIndex={isError ? -1 : undefined}
-        className={`flex w-full items-center gap-3 rounded-md border px-3 py-2 text-sm ${
+        className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-sm ${
           isError
             ? "border-red-800 bg-red-950/40 text-red-200"
-            : "border-zinc-700 bg-zinc-900 text-zinc-300"
+            : "border-white/10 bg-[#0b1322] text-[#c8d3e4]"
         }`}
       >
         <p className="flex-1">{children}</p>

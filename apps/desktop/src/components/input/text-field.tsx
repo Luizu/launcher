@@ -39,7 +39,7 @@ export function TextField({
         placeholder={placeholder}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+        className="rounded-lg border border-white/10 bg-[#111b2d] px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:border-[#8cf5d0] focus:outline-none focus:ring-1 focus:ring-[#8cf5d0]"
       />
     </div>
   );

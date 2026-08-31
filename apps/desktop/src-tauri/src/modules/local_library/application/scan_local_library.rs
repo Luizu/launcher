@@ -418,7 +418,7 @@ mod tests {
     fn fixture_library_with_manifests(manifests: &[(&str, &str, &str)]) -> FixtureLibrary {
         static COUNTER: AtomicU64 = AtomicU64::new(0);
         let root = std::env::temp_dir().join(format!(
-            "launcher-scan-test-{}-{}",
+            "fuse-launcher-scan-test-{}-{}",
             std::process::id(),
             COUNTER.fetch_add(1, Ordering::Relaxed)
         ));

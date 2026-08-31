@@ -1,4 +1,4 @@
-import type { GameLibraryResponse, SyncLibraryResult } from "@launcher/contracts";
+import type { GameLibraryResponse, SyncLibraryResult } from "@fuse-launcher/contracts";
 import { ApiClient } from "../../lib/api-client";
 
 /**

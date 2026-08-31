@@ -1,7 +1,10 @@
-# Launcher Desktop
+# Fuse Launcher Desktop
 
-Tauri 2 desktop runtime for the Launcher (Windows-first). React + TypeScript shell in
+Tauri 2 desktop runtime for Fuse Launcher (Windows-first). React + TypeScript shell in
 Vite, native runtime in Rust under `src-tauri/`.
+
+The product's short name is **Fuse** and its proprietary identity is **CUT**,
+represented by the geometric F mark in the shell and native app icon.
 
 ## Windows prerequisites
 

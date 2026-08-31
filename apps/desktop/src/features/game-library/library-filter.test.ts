@@ -1,4 +1,4 @@
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LibraryGame } from "../../lib/merge-library";
 import {
   displayedTitle,
   filterGames,
@@ -6,7 +6,7 @@ import {
   sortGames,
 } from "./library-filter";
 
-function game(overrides: Partial<LauncherGame>): LauncherGame {
+function game(overrides: Partial<LibraryGame>): LibraryGame {
   return {
     provider: "steam",
     externalGameId: "1",

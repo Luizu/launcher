@@ -2,7 +2,7 @@ import type {
   GameLibraryConnection,
   GameLibraryResponse,
   LocalLibrarySnapshot,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import { mergeLibrary } from "./merge-library";
 
 const SYNCED_PUBLIC: GameLibraryConnection = {

@@ -1,4 +1,4 @@
-import type { GameCatalogIdentity } from "@launcher/contracts";
+import type { GameCatalogIdentity } from "@fuse-launcher/contracts";
 import {
   selectGamePageMedia,
   selectHeroMedia,

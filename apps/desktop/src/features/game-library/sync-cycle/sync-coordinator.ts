@@ -1,4 +1,4 @@
-import type { PlatformId, SyncLibraryResult } from "@launcher/contracts";
+import type { PlatformId, SyncLibraryResult } from "@fuse-launcher/contracts";
 
 export type SyncRunner = () => Promise<SyncLibraryResult>;
 

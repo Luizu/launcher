@@ -4,7 +4,7 @@ import type {
   GameLibraryConnection,
   GameLibraryResponse,
   LinkAttemptStatus,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import type { GameLibraryClientLike } from "../game-library/game-library-client";
 import type { PlatformConnectionsClientLike } from "../platform-connections/platform-connections-client";
 import { OnboardingPage } from "./onboarding-page";
@@ -79,7 +79,7 @@ it("explains why the connection is needed and offers the Steam flow", async () =
     screen.getByText(/sincronizar sua biblioteca remota/i),
   ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Conectar Steam" })).toBeInTheDocument();
-  // The launcher never asks for Steam credentials.
+  // Fuse Launcher never asks for Steam credentials.
   expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
 });
 

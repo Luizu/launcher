@@ -3,7 +3,7 @@ import type {
   GameCatalogIdentity,
   MediaPurpose,
   MediaVariant,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 
 /** Scan order across the media groups; per-group order is the API's. */
 const VARIANT_GROUPS: ReadonlyArray<keyof CatalogIdentityMedia> = [

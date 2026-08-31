@@ -5,8 +5,8 @@ import type {
   InstallStatus,
   LocalInstallState,
   LocalLibrarySnapshot,
-} from "@launcher/contracts";
-import type { LauncherGame } from "../../lib/merge-library";
+} from "@fuse-launcher/contracts";
+import type { LibraryGame } from "../../lib/merge-library";
 import { TauriClient } from "../../lib/tauri-client";
 import { LAUNCH_HISTORY_QUERY_KEY } from "../launch-history/use-launch-history";
 import { LOCAL_LIBRARY_QUERY_KEY } from "../local-library/use-local-library";
@@ -59,7 +59,7 @@ export interface GameActionsClientLike {
 const defaultTauriClient = new TauriClient();
 
 /** A game id is actionable only when it is a positive integer Steam AppID. */
-function toNumericAppId(game: LauncherGame): number | null {
+function toNumericAppId(game: LibraryGame): number | null {
   if (game.provider !== "steam") return null;
   const id = Number(game.externalGameId);
   return Number.isSafeInteger(id) && id > 0 ? id : null;
@@ -86,8 +86,8 @@ interface PollHandle {
 }
 
 type LastAction =
-  | { kind: "launch"; game: LauncherGame }
-  | { kind: "install"; game: LauncherGame }
+  | { kind: "launch"; game: LibraryGame }
+  | { kind: "install"; game: LibraryGame }
   | { kind: "open-steam" };
 
 export interface UseGameActionsOptions {
@@ -99,11 +99,11 @@ export interface UseGameActionsOptions {
 
 export interface UseGameActionsResult {
   /** Launches a local installed game; guarded in the hook, not only the UI. */
-  launch(game: LauncherGame): Promise<void>;
+  launch(game: LibraryGame): Promise<void>;
   /** Requests installation for a Steam remote entry with a numeric AppID. */
-  install(game: LauncherGame): Promise<void>;
+  install(game: LibraryGame): Promise<void>;
   /** Refreshes one game's native install state into the local snapshot. */
-  refreshInstallStatus(game: LauncherGame): Promise<void>;
+  refreshInstallStatus(game: LibraryGame): Promise<void>;
   /** Opens Steam's downloads page (recovery for the `unknown` state). */
   openSteamDownloads(): Promise<void>;
   isLaunching: boolean;
@@ -149,7 +149,7 @@ export function useGameActions({
 
   /** Writes a native install state into the cached local snapshot. */
   const applyLocalState = useCallback(
-    (game: LauncherGame, state: LocalInstallState) => {
+    (game: LibraryGame, state: LocalInstallState) => {
       const appId = toNumericAppId(game);
       if (appId === null) return;
       const snapshot = queryClient.getQueryData<LocalLibrarySnapshot>(
@@ -181,7 +181,7 @@ export function useGameActions({
   }, []);
 
   const startPolling = useCallback(
-    (game: LauncherGame, appId: number) => {
+    (game: LibraryGame, appId: number) => {
       const deadline = Date.now() + MAX_POLL_MS;
       const tick = async () => {
         if (!pollsRef.current.has(appId)) return;
@@ -245,7 +245,7 @@ export function useGameActions({
   );
 
   const launch = useCallback(
-    async (game: LauncherGame): Promise<void> => {
+    async (game: LibraryGame): Promise<void> => {
       if (game.installState !== "installed") {
         lastAction.current = { kind: "launch", game };
         setError(NATIVE_ERROR_MESSAGES["game-not-installed"]);
@@ -282,7 +282,7 @@ export function useGameActions({
   );
 
   const install = useCallback(
-    async (game: LauncherGame): Promise<void> => {
+    async (game: LibraryGame): Promise<void> => {
       if (game.installState !== "not-installed") {
         lastAction.current = { kind: "install", game };
         setError("Não foi possível iniciar a instalação deste jogo.");
@@ -320,7 +320,7 @@ export function useGameActions({
   );
 
   const refreshInstallStatus = useCallback(
-    async (game: LauncherGame): Promise<void> => {
+    async (game: LibraryGame): Promise<void> => {
       const appId = toNumericAppId(game);
       if (appId === null || pendingRef.current.has(appId)) return;
       pendingRef.current.add(appId);

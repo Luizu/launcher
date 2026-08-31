@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { PlatformId, SyncLibraryResult } from "@launcher/contracts";
+import type { PlatformId, SyncLibraryResult } from "@fuse-launcher/contracts";
 import { ApiClient } from "../../../lib/api-client";
 import { useSession } from "../../auth/use-session";
 import { GAME_LIBRARY_QUERY_KEY } from "../../platform-connections/use-steam-connection";
@@ -28,7 +28,7 @@ export interface UseSyncCycleOptions {
 }
 
 /**
- * The desktop sync cycle. Keeps the library current while the launcher is
+ * The desktop sync cycle. Keeps the library current while Fuse Launcher is
  * open:
  *
  * - on mount, once the session is settled and a connection is known to

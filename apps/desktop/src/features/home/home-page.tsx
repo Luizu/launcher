@@ -36,7 +36,7 @@ export function HomePage({
 
   if (home.isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
+      <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-[104px] max-[800px]:pt-[82px]">
         <h1 className="sr-only">Home</h1>
         <LibraryState loading />
       </div>
@@ -53,7 +53,7 @@ export function HomePage({
           </p>
           <p className="max-w-md text-sm text-zinc-500">
             Seus jogos instalados e sua atividade recente aparecem aqui. A
-            Biblioteca reúne tudo o que o launcher conhece sobre seus jogos.
+            Biblioteca reúne tudo o que o Fuse Launcher conhece sobre seus jogos.
           </p>
           <Link
             to="/library"

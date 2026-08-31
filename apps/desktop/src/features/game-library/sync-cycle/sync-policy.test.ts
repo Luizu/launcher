@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { isSyncStale, SYNC_STALE_MS } from "./sync-policy";
-import type { GameLibraryConnection } from "@launcher/contracts";
+import type { GameLibraryConnection } from "@fuse-launcher/contracts";
 
 const NOW = Date.parse("2026-08-29T12:00:00.000Z");
 const STALE_MS = 15 * 60 * 1000; // 15 minutes

@@ -3,14 +3,14 @@ import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { GameCard } from "./game-card";
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LibraryGame } from "../../lib/merge-library";
 
 /** The card title links to the game page, so the card needs a router. */
 function renderCard(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
 }
 
-const INSTALLED_CS2: LauncherGame = {
+const INSTALLED_CS2: LibraryGame = {
   provider: "steam",
   externalGameId: "730",
   name: "Counter-Strike 2",

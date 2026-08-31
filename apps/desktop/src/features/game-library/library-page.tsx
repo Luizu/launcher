@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type { LocalLibrarySnapshot } from "@launcher/contracts";
+import type { LocalLibrarySnapshot } from "@fuse-launcher/contracts";
 import { GameCard } from "../../components/game-card/game-card";
 import { InlineStatus } from "../../components/status/inline-status";
 import { LibraryState } from "../../components/status/library-state";
@@ -141,7 +141,7 @@ export function LibraryPage({
   const scanPending = local.isLoading && !local.snapshot;
 
   return (
-    <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
+    <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-[104px] max-[800px]:pt-[82px]">
       <h1 className="text-2xl font-semibold tracking-tight">Biblioteca</h1>
 
       {firstLoad ? (
@@ -176,7 +176,7 @@ export function LibraryPage({
                 resultCount={visibleGames.length}
               />
               {visibleGames.length === 0 ? (
-                <div className="flex flex-col items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-900/60 p-8 text-center">
+                <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-[#0b1322]/80 p-8 text-center">
                   <p className="text-sm text-zinc-300">
                     Nenhum jogo corresponde aos filtros.
                   </p>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { LocalLibrarySnapshot } from "@launcher/contracts";
+import type { LocalLibrarySnapshot } from "@fuse-launcher/contracts";
 import { mergeLibrary } from "../../lib/merge-library";
 import type { GameLibraryClientLike } from "../game-library/game-library-client";
 import { useGameActions, type GameActionsClientLike } from "../game-library/use-game-actions";

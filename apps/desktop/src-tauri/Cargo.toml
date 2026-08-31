@@ -1,11 +1,11 @@
 [package]
-name = "launcher-desktop"
+name = "fuse-launcher-desktop"
 version = "0.2.1"
-description = "Native Windows runtime for the launcher desktop shell"
+description = "Native Windows runtime for the Fuse Launcher desktop shell"
 edition = "2021"
 
 [lib]
-name = "launcher_desktop_lib"
+name = "fuse_launcher_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [features]

@@ -1,6 +1,6 @@
 //! Domain types for the observable installation state of a local game.
 //!
-//! The launcher tracks installation state, but never claims an exact
+//! Fuse Launcher tracks installation state, but never claims an exact
 //! download percentage; the states below are derived only from the game's
 //! manifest and install directory.
 

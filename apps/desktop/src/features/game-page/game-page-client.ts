@@ -1,4 +1,4 @@
-import type { GamePageResponse } from "@launcher/contracts";
+import type { GamePageResponse } from "@fuse-launcher/contracts";
 import { ApiClient } from "../../lib/api-client";
 
 /**

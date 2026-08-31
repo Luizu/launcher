@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GamePageResponse } from "@launcher/contracts";
+import type { GamePageResponse } from "@fuse-launcher/contracts";
 import { ApiClient } from "../../lib/api-client";
 import { GamePagesClient } from "./game-page-client";
 

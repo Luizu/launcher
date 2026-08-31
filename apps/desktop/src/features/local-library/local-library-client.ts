@@ -1,4 +1,4 @@
-import type { LocalLibrarySnapshot } from "@launcher/contracts";
+import type { LocalLibrarySnapshot } from "@fuse-launcher/contracts";
 import { TauriClient } from "../../lib/tauri-client";
 
 /**

@@ -1,5 +1,5 @@
 import { useRef, type KeyboardEvent } from "react";
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LibraryGame } from "../../lib/merge-library";
 import { selectSelectorCover } from "../../lib/media-fallback";
 import { useCompactViewport } from "../../lib/use-media-query";
 import { providerLabel } from "../../lib/provider-label";
@@ -17,7 +17,7 @@ const SELECTOR_TOP_COMPACT = "top-[109px]";
 
 export interface GameSelectorProps {
   /** The games to browse: installed games, or the top prioritized library. */
-  games: ReadonlyArray<LauncherGame>;
+  games: ReadonlyArray<LibraryGame>;
   /** Key of the item currently emphasized (focused, else featured). */
   activeKey: string | null;
   /** Focuses a game; the hero commits after the debounce (never launches). */

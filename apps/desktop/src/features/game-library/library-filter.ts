@@ -1,4 +1,4 @@
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LibraryGame } from "../../lib/merge-library";
 
 /** Sort keys offered by the Biblioteca toolbar. */
 export type LibrarySortKey = "default" | "title" | "activity" | "playtime";
@@ -13,12 +13,12 @@ export interface LibraryFilterOptions {
 }
 
 /** Title the UI shows for a game: catalog identity name when enriched. */
-export function displayedTitle(game: LauncherGame): string {
+export function displayedTitle(game: LibraryGame): string {
   return game.catalogIdentity?.name ?? game.name;
 }
 
 /** Unique providers in first-appearance order; drives the provider filter. */
-export function libraryProviders(games: readonly LauncherGame[]): string[] {
+export function libraryProviders(games: readonly LibraryGame[]): string[] {
   const providers: string[] = [];
   for (const game of games) {
     if (!providers.includes(game.provider)) providers.push(game.provider);
@@ -32,9 +32,9 @@ export function libraryProviders(games: readonly LauncherGame[]): string[] {
  * blank) query keeps every game. Enrichment status never affects the match.
  */
 export function filterGames(
-  games: readonly LauncherGame[],
+  games: readonly LibraryGame[],
   { query, installedOnly, provider }: LibraryFilterOptions,
-): LauncherGame[] {
+): LibraryGame[] {
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
   return games.filter((game) => {
     if (installedOnly && game.installState !== "installed") return false;
@@ -48,25 +48,25 @@ export function filterGames(
 }
 
 /** Last activity as a timestamp, or null when absent or unparsable. */
-function activityTime(game: LauncherGame): number | null {
+function activityTime(game: LibraryGame): number | null {
   const value = game.lastActivityAt;
   if (value == null) return null;
   const time = new Date(value).getTime();
   return Number.isNaN(time) ? null : time;
 }
 
-function compareNames(a: LauncherGame, b: LauncherGame): number {
+function compareNames(a: LibraryGame, b: LibraryGame): number {
   return displayedTitle(a).localeCompare(displayedTitle(b), "pt");
 }
 
 /** Full-order tie-break so every sort stays deterministic per render. */
-function compareKeys(a: LauncherGame, b: LauncherGame): number {
+function compareKeys(a: LibraryGame, b: LibraryGame): number {
   return `${a.provider}:${a.externalGameId}`.localeCompare(
     `${b.provider}:${b.externalGameId}`,
   );
 }
 
-function tieBreak(a: LauncherGame, b: LauncherGame): number {
+function tieBreak(a: LibraryGame, b: LibraryGame): number {
   return compareNames(a, b) || compareKeys(a, b);
 }
 
@@ -81,9 +81,9 @@ function tieBreak(a: LauncherGame, b: LauncherGame): number {
  *   `provider:externalGameId` so the order never flips between renders.
  */
 export function sortGames(
-  games: readonly LauncherGame[],
+  games: readonly LibraryGame[],
   sortKey: LibrarySortKey,
-): LauncherGame[] {
+): LibraryGame[] {
   const sorted = [...games];
   if (sortKey === "title") {
     sorted.sort((a, b) => compareNames(a, b) || compareKeys(a, b));

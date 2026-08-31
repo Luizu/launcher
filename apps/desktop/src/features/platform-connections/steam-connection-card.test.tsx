@@ -4,7 +4,7 @@ import type {
   GameLibraryConnection,
   LinkAttemptStatus,
   StartPlatformLinkResponse,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 import { SteamConnectionCard } from "./steam-connection-card";
 
 const AUTHORIZATION_URL = "https://steamcommunity.com/openid/login";

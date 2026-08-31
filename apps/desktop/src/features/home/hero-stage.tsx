@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LibraryGame } from "../../lib/merge-library";
 import { ActionButton } from "../../components/button/action-button";
 import { formatPlaytime } from "../../components/game-card/game-card";
 import { InlineStatus } from "../../components/status/inline-status";
@@ -10,9 +10,10 @@ import { selectHeroMedia } from "../../lib/media-fallback";
 import { usePrefersReducedMotion } from "../../lib/use-media-query";
 import { providerLabel } from "../../lib/provider-label";
 import { gameKey } from "./select-featured-game";
+import { PlayIcon } from "../../components/icons/app-icon";
 
 /** PT-BR meta vocabulary for the merged install states. */
-const INSTALL_STATE_LABELS: Record<LauncherGame["installState"], string> = {
+const INSTALL_STATE_LABELS: Record<LibraryGame["installState"], string> = {
   installed: "Instalado",
   "not-installed": "Não instalado",
   installing: "Instalando",
@@ -20,7 +21,7 @@ const INSTALL_STATE_LABELS: Record<LauncherGame["installState"], string> = {
 };
 
 export interface HeroStageProps {
-  game: LauncherGame;
+  game: LibraryGame;
   /** True while the local scan is pending: install states are untrustworthy. */
   scanPending?: boolean;
   /** True when the last sync failed: a subtle contextual note near the meta. */
@@ -128,7 +129,7 @@ export function HeroStage({
       disabled={actions.isLaunching}
       onClick={() => void actions.launch(game)}
     >
-      <span aria-hidden="true">▶</span> Jogar
+      <PlayIcon className="h-4 w-4" /> Jogar
     </ActionButton>
   ) : game.installState === "not-installed" ? (
     <ActionButton

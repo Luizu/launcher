@@ -90,7 +90,7 @@ fn is_watched_name(name: &str) -> bool {
 ///
 /// The watcher is a plain struct owning its loop state; the app setup moves
 /// it into a `std::thread` and the process lifetime owns it (the thread dies
-/// with the process — no agent keeps watching after the launcher closes).
+/// with the process — no agent keeps watching after Fuse Launcher closes).
 /// [`Self::tick`] runs one poll iteration so tests can drive the loop with a
 /// fake clock; [`Self::run`] loops `tick` + sleep forever.
 pub struct SteamWatcher<
@@ -375,7 +375,7 @@ mod tests {
         fn new() -> Self {
             static COUNTER: AtomicU64 = AtomicU64::new(0);
             let root = std::env::temp_dir().join(format!(
-                "launcher-watch-test-{}-{}",
+                "fuse-launcher-watch-test-{}-{}",
                 std::process::id(),
                 COUNTER.fetch_add(1, Ordering::Relaxed)
             ));

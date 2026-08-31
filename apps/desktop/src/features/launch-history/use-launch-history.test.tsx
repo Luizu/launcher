@@ -1,6 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { LaunchHistory } from "@launcher/contracts";
+import type { LaunchHistory } from "@fuse-launcher/contracts";
 import { useLaunchHistory, launchHistoryToMap } from "./use-launch-history";
 import type { LaunchHistoryClientLike } from "./launch-history-client";
 

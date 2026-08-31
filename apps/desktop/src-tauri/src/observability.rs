@@ -13,7 +13,7 @@ pub(crate) fn native_dsn(dsn: Option<&str>) -> Option<&str> {
 }
 
 pub(crate) fn native_release(version: &str) -> String {
-    format!("launcher@{version}")
+    format!("fuse-launcher@{version}")
 }
 
 /// Initializes panic reporting everywhere and Crashpad hard-crash reporting
@@ -462,13 +462,13 @@ mod tests {
 
     #[test]
     fn native_release_uses_the_product_version() {
-        assert_eq!(native_release("0.3.0"), "launcher@0.3.0");
+        assert_eq!(native_release("0.3.0"), "fuse-launcher@0.3.0");
     }
 
     #[test]
     fn native_text_redacts_multiple_secrets_without_leaking_or_panicking() {
         let sanitized = sanitize_native_text(
-            "token=first-secret password=second-secret /Users/alice/launcher/config.json",
+            "token=first-secret password=second-secret /Users/alice/fuse-launcher/config.json",
         );
 
         assert!(!sanitized.contains("first-secret"));

@@ -1,6 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { LocalLibrarySnapshot } from "@launcher/contracts";
+import type { LocalLibrarySnapshot } from "@fuse-launcher/contracts";
 import { useLocalLibrary } from "./use-local-library";
 import {
   LOCAL_LIBRARY_CHANGED_EVENT,

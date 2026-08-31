@@ -1,14 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import type { ReactElement } from "react";
-import type { LauncherGame } from "../../lib/merge-library";
+import type { LibraryGame } from "../../lib/merge-library";
 import { REDUCED_MOTION_QUERY } from "../../lib/use-media-query";
 import { mockMatchMedia, restoreMatchMedia } from "../../test/match-media";
 import type { UseGameActionsResult } from "../game-library/use-game-actions";
 import { HeroStage } from "./hero-stage";
 
 /** Media-bearing games so the hero walks the media path, not the fallback. */
-const GAME_A: LauncherGame = {
+const GAME_A: LibraryGame = {
   provider: "steam",
   externalGameId: "730",
   name: "Counter-Strike 2",
@@ -24,7 +24,7 @@ const GAME_A: LauncherGame = {
   },
 };
 
-const GAME_B: LauncherGame = {
+const GAME_B: LibraryGame = {
   provider: "steam",
   externalGameId: "4000",
   name: "Garry's Mod",
@@ -40,7 +40,7 @@ const GAME_B: LauncherGame = {
   },
 };
 
-const GAME_C: LauncherGame = {
+const GAME_C: LibraryGame = {
   provider: "steam",
   externalGameId: "999",
   name: "Void Run",
@@ -70,7 +70,7 @@ const ACTIONS: UseGameActionsResult = {
 afterEach(restoreMatchMedia);
 
 /** The hero renders a Detalhes link, so the stage needs a router context. */
-function stageElement(game: LauncherGame): ReactElement {
+function stageElement(game: LibraryGame): ReactElement {
   return (
     <MemoryRouter>
       <HeroStage game={game} actions={ACTIONS} />

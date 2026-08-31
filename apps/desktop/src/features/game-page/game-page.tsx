@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { EnrichmentStatus, LocalLibrarySnapshot } from "@launcher/contracts";
+import type { EnrichmentStatus, LocalLibrarySnapshot } from "@fuse-launcher/contracts";
 import { ActionButton } from "../../components/button/action-button";
 import { formatPlaytime } from "../../components/game-card/game-card";
 import { InlineStatus } from "../../components/status/inline-status";
 import { InstallStatus } from "../../components/status/install-status";
 import {
   mergeLibrary,
-  type LauncherGame,
+  type LibraryGame,
 } from "../../lib/merge-library";
 import {
   selectGamePageMedia,
@@ -16,6 +16,7 @@ import {
 import { providerLabel } from "../../lib/provider-label";
 import type { GameActionsClientLike } from "../game-library/use-game-actions";
 import { useGameActions } from "../game-library/use-game-actions";
+import { ArrowLeftIcon } from "../../components/icons/app-icon";
 import type { LocalLibraryClientLike } from "../local-library/local-library-client";
 import { useLocalLibrary } from "../local-library/use-local-library";
 import type { OpenUrl } from "../platform-connections/use-steam-connection";
@@ -58,14 +59,14 @@ function ProviderEntryRow({
   scanPending,
   actions,
 }: {
-  game: LauncherGame;
+  game: LibraryGame;
   scanPending: boolean;
   actions: ReturnType<typeof useGameActions>;
 }) {
   const [busy, setBusy] = useState(false);
 
   const runAction =
-    (action: (game: LauncherGame) => void | Promise<void>) => () => {
+    (action: (game: LibraryGame) => void | Promise<void>) => () => {
       if (busy) return;
       setBusy(true);
       void Promise.resolve(action(game))
@@ -181,13 +182,13 @@ export function GamePage({
   const scanPending = local.isLoading && !local.snapshot;
 
   return (
-    <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
+    <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-[104px] max-[800px]:pt-[82px]">
       <button
         type="button"
         onClick={() => navigate(-1)}
         className="inline-flex w-fit items-center gap-1 text-sm text-zinc-400 underline-offset-4 hover:text-zinc-200 hover:underline focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8cf5d0]"
       >
-        <span aria-hidden="true">←</span> Voltar
+        <ArrowLeftIcon className="h-4 w-4" /> Voltar
       </button>
 
       {page.isLoading ? (

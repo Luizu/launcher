@@ -5,14 +5,14 @@ import type {
   LocalGame,
   LocalLibrarySnapshot,
   PlatformId,
-} from "@launcher/contracts";
+} from "@fuse-launcher/contracts";
 
 /**
  * Installation vocabulary the UI and Task 6 actions consume. Derived from the
  * local snapshot: `installed` → `installed`, `installing` → `installing`,
  * `unknown` → `unknown`; absent from the local snapshot → `not-installed`.
  */
-export type LauncherInstallState =
+export type InstallState =
   | "installed"
   | "not-installed"
   | "installing"
@@ -24,13 +24,13 @@ export type LauncherInstallState =
  * convert them back to numbers safely; the remote entry is the display
  * source for name, artwork, and playtime when present.
  */
-export interface LauncherGame {
+export interface LibraryGame {
   provider: PlatformId;
   externalGameId: string;
   name: string;
   artwork?: string | null;
   playtimeMinutes?: number;
-  installState: LauncherInstallState;
+  installState: InstallState;
   /**
    * Last known remote activity instant as an ISO string; absent for
    * local-only games (the provider never saw them).
@@ -44,7 +44,7 @@ export interface LauncherGame {
 }
 
 /** Maps the native snapshot state onto the merged vocabulary. */
-const LOCAL_STATE_TO_INSTALL: Record<LocalGame["state"], LauncherInstallState> = {
+const LOCAL_STATE_TO_INSTALL: Record<LocalGame["state"], InstallState> = {
   installed: "installed",
   installing: "installing",
   unknown: "unknown",
@@ -84,7 +84,7 @@ function joinKey(provider: PlatformId, externalGameId: string | number): string 
 export function mergeLibrary(
   remote: GameLibraryResponse,
   local: LocalLibrarySnapshot,
-): LauncherGame[] {
+): LibraryGame[] {
   const connection = remote.connection;
   if (
     connection !== null &&
@@ -99,7 +99,7 @@ export function mergeLibrary(
     localByKey.set(joinKey(game.provider, game.externalGameId), game);
   }
 
-  const merged: LauncherGame[] = [];
+  const merged: LibraryGame[] = [];
   const seen = new Set<string>();
 
   for (const entry of remote.entries) {

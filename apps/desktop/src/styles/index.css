@@ -3,6 +3,17 @@
 :root {
   color-scheme: dark;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  --fuse-ink: #050914;
+  --fuse-night: #07101b;
+  --fuse-surface: #0b1322;
+  --fuse-panel: #111b2d;
+  --fuse-mint: #8cf5d0;
+  --fuse-mint-bright: #a5f8db;
+  --fuse-orange: #ff925e;
+  --fuse-blue: #79a9ff;
+  --fuse-text: #f2f6ff;
+  --fuse-muted: #9eabc0;
+  --fuse-line: rgba(177, 207, 241, 0.16);
 }
 
 body {
@@ -11,8 +22,18 @@ body {
      ~800×600 and nothing forces the page to scroll horizontally. Wide
      content scrolls inside its own container (selector row, grids,
      toolbars). */
-  background: #101114;
-  color: #f4f4f5;
+  background: var(--fuse-ink);
+  color: var(--fuse-text);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--fuse-mint) 28%, transparent);
+  color: var(--fuse-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--fuse-mint);
+  outline-offset: 2px;
 }
 
 /* Ambient motion — the approved "Ambiente" level: a slow, subtle loop on the

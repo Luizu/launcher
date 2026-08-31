@@ -32,7 +32,7 @@ export default defineConfig({
             authToken: process.env.SENTRY_AUTH_TOKEN,
             org: process.env.SENTRY_ORG,
             project: process.env.SENTRY_RENDERER_PROJECT,
-            release: { name: `launcher@${rootPackage.version}` },
+            release: { name: `fuse-launcher@${rootPackage.version}` },
             sourcemaps: {
               filesToDeleteAfterUpload: "dist/**/*.map",
             },

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { App } from "./App";
 
-it("renders the launcher shell", () => {
+it("renders the Fuse Launcher shell", () => {
   render(
     <MemoryRouter>
       <Routes>
